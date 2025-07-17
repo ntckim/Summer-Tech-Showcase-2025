@@ -9,7 +9,10 @@ import { bracketMatching } from '@codemirror/language';
 import { closeBrackets } from '@codemirror/autocomplete';
 import { loadPyodide } from 'pyodide';
 
-export default function CodeEditor() {
+export default function CodeEditor({
+  graphOrdering,
+  setSharedData
+}) {
   const editorRef = useRef(null);
   const [output, setOutput] = useState('');
   const [editorView, setEditorView] = useState(null);
@@ -42,20 +45,9 @@ export default function CodeEditor() {
         doc: `# Welcome to the Algorithm Visualization Code Editor!
 # Start coding your algorithms here...
 
-def bubble_sort(arr):
-    n = len(arr)
-    for i in range(n - 1):
-        for j in range(n - i - 1):
-            if arr[j] > arr[j + 1]:
-                # Swap elements
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-    return arr
-
-# Example usage
-numbers = [64, 34, 25, 12, 22, 11, 90]
-print("Original array:", numbers)
-sorted_numbers = bubble_sort(numbers.copy())
-print("Sorted array:", sorted_numbers)`,
+def dfs():
+  return []
+    `,
         extensions: [
           lineNumbers(),
           keymap.of([defaultKeymap, indentWithTab]),
@@ -102,8 +94,27 @@ print("Sorted array:", sorted_numbers)`,
       // Run the Python code
       await pyodide.runPythonAsync(code);
       
+      let returnValues = {};
+
+      try {
+        if (pyodide.globals.has('dfs')) {
+          const result = pyodide.runPython('dfs()');
+          console.log(result);
+          const jsResult = result.toJs ? result.toJs() : result;
+          console.log("Converted Result:", jsResult);
+          returnValues.dfs = jsResult;
+          capturedOutput += `\nReturn value from dfs(): ${JSON.stringify(result)}\n`;
+        }
+      } catch (funcError) {
+        capturedOutput += `\nFunction call error: ${funcError.message}\n`;
+      }
+
       // Restore original print function
       pyodide.globals.set('print', originalStdout);
+
+      setSharedData({
+        output: returnValues,
+      });
       
       setOutput(capturedOutput || 'Code executed successfully! (No output)');
     } catch (error) {

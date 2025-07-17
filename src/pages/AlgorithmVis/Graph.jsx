@@ -5,12 +5,15 @@ import cytoscape from 'cytoscape';
 
 cytoscape.use(klay)
 
-export default function CustomPathGraph() {
+export default function CustomPathGraph({
+  graphOrdering,
+}) {
   const cyRef = useRef(null);
   const intervalRef = useRef(null);
   const indexRef = useRef(0);
   const pathRef = useRef([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [pathNodeIds, setPathNodeIds] = useState(['a', 'b', 'c', 'd', 'e']); // Default path
 
   const elements = [
     // Nodes
@@ -34,7 +37,7 @@ export default function CustomPathGraph() {
     {
       selector: 'node',
       style: {
-        //content: 'data(id)',
+        content: 'data(id)',
         'text-valign': 'center',
         'background-color': '#999',
         color: '#fff',
@@ -64,13 +67,20 @@ export default function CustomPathGraph() {
       },
     },
   ];
+  useEffect(() => {
+    if (graphOrdering && graphOrdering.output) {
+      console.log(graphOrdering.output.dfs);
+      setPathNodeIds(graphOrdering.output.dfs);
+    }
+  }, [graphOrdering]);
 
   useEffect(() => {
     const cy = cyRef.current;
     if (!cy) return;
 
     // Define manual path
-    const pathNodeIds = ['a', 'b', 'c', 'd', 'e'];
+    //const pathNodeIds = ['a', 'b', 'c', 'd', 'e'];
+    console.log("new path", pathNodeIds);
     const elementsToHighlight = [];
 
     for (let i = 0; i < pathNodeIds.length; i++) {
@@ -86,7 +96,7 @@ export default function CustomPathGraph() {
     }
 
     pathRef.current = elementsToHighlight;
-  }, []);
+  }, [pathNodeIds]);
 
   const startAnimation = () => {
     if (isRunning || !pathRef.current.length) return;
