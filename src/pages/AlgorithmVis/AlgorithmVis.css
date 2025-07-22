@@ -3,24 +3,52 @@
     height: 100vh;
     width: 100vw;
     overflow: hidden;
+    position: relative;
 }
 
 .left-side {
-  flex: 1;
-  min-width: 300px;
+  min-width: 200px;
   border-right: 1px solid #ccc;
   padding: 1rem;
   background-color: #f8f9fa;
   overflow: auto;
-  
-  
+  height: 100%;
 }
 
 .right-side {
-  flex: 2;
-  min-width: 0; /* prevents overflow */
+  min-width: 200px;
   padding: 1rem;
   background-color: #fff;
   position: relative;
   overflow: hidden;
+  height: 100%;
+}
+
+.resize-handle {
+  width: 6px;
+  background-color: #e0e0e0;
+  cursor: col-resize;
+  position: relative;
+  transition: background-color 0.2s ease;
+  height: 100%;
+}
+
+.resize-handle:hover {
+  background-color: #007bff;
+}
+
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 30px;
+  background-color: #999;
+  border-radius: 1px;
+}
+
+.resize-handle:hover::before {
+  background-color: #fff;
 }

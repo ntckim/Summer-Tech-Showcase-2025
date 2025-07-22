@@ -11,13 +11,19 @@ import { loadPyodide } from 'pyodide';
 
 export default function CodeEditor({
   graphOrdering,
-  setSharedData
+  setSharedData,
+  runGraph,
+  setRunGraph
 }) {
   const editorRef = useRef(null);
   const [output, setOutput] = useState('');
   const [editorView, setEditorView] = useState(null);
   const [pyodide, setPyodide] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  setRunGraph(false)
+
+  console.log(runGraph)
 
   // Initialize Pyodide
   useEffect(() => {
@@ -99,9 +105,9 @@ def dfs():
       try {
         if (pyodide.globals.has('dfs')) {
           const result = pyodide.runPython('dfs()');
-          console.log(result);
+          //console.log(result);
           const jsResult = result.toJs ? result.toJs() : result;
-          console.log("Converted Result:", jsResult);
+          //console.log("Converted Result:", jsResult);
           returnValues.dfs = jsResult;
           capturedOutput += `\nReturn value from dfs(): ${JSON.stringify(result)}\n`;
         }
@@ -115,6 +121,8 @@ def dfs():
       setSharedData({
         output: returnValues,
       });
+
+      setRunGraph(true)
       
       setOutput(capturedOutput || 'Code executed successfully! (No output)');
     } catch (error) {

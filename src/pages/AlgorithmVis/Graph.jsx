@@ -7,6 +7,7 @@ cytoscape.use(klay)
 
 export default function CustomPathGraph({
   graphOrdering,
+  runGraph,
 }) {
   const cyRef = useRef(null);
   const intervalRef = useRef(null);
@@ -97,6 +98,14 @@ export default function CustomPathGraph({
 
     pathRef.current = elementsToHighlight;
   }, [pathNodeIds]);
+
+
+  useEffect(() => {
+    if (runGraph) {
+      startAnimation()
+    }
+
+  }, [runGraph])
 
   const startAnimation = () => {
     if (isRunning || !pathRef.current.length) return;
