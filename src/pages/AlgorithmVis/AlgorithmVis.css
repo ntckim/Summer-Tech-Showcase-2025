@@ -1,9 +1,11 @@
 .grid-container {
     display: flex;
-    height: 100vh;
-    width: 100vw;
+    height: calc(100vh - 200px); /* Account for header and footer */
+    width: 100%;
     overflow: hidden;
     position: relative;
+    margin: -2rem; /* Offset the main-content padding */
+    margin-top: 0;
 }
 
 .left-side {
