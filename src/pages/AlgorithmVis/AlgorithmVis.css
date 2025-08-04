@@ -52,3 +52,451 @@
 .resize-handle:hover::before {
   background-color: #fff;
 }
+
+/* Tab Styles */
+.tab-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-buttons {
+  display: flex;
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 1rem;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.tab-button.active {
+  background-color: #fff;
+  color: #007bff;
+  border-bottom-color: #007bff;
+}
+
+.tab-content {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Lesson Content Styles */
+.lesson-content {
+  padding: 0;
+  line-height: 1.6;
+}
+
+.lesson-content h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+.lesson-content h3 {
+  color: #34495e;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.3rem;
+}
+
+.lesson-content section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lesson-content p {
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.lesson-content ul, .lesson-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.lesson-content li {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.lesson-content strong {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.lesson-content ul li strong {
+  color: #27ae60;
+}
+
+.lesson-content ol li strong {
+  color: #f39c12;
+}
+
+/* Code Editor Styles */
+.code-editor-container {
+  position: relative;
+  background-color: #282c34;
+  border: 1px solid #3e4451 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 0;
+}
+
+.code-editor-container:hover {
+  border-color: #61dafb !important;
+  box-shadow: 0 0 8px rgba(97, 218, 251, 0.3);
+}
+
+.code-editor-container .cm-editor {
+  height: 100%;
+  font-family: 'Fira Code', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.code-editor-container .cm-editor .cm-scroller {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4a5568 #2d3748;
+}
+
+.code-editor-container .cm-editor .cm-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-editor-container .cm-editor .cm-scroller::-webkit-scrollbar-track {
+  background: #2d3748;
+  border-radius: 4px;
+}
+
+.code-editor-container .cm-editor .cm-scroller::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.code-editor-container .cm-editor .cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+.code-editor-container .cm-editor .cm-content {
+  padding: 16px;
+  cursor: text;
+}
+
+.code-editor-container .cm-editor .cm-line {
+  cursor: text;
+}
+
+.code-editor-container .cm-editor .cm-line:hover {
+  background-color: rgba(97, 218, 251, 0.1);
+}
+
+/* Ensure the editor takes full height and scrolls properly */
+.code-editor-container .cm-editor {
+  height: 100% !important;
+  min-height: 300px;
+}
+
+/* Editor Header Styles */
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+
+.editor-header h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.editor-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.run-button, .toggle-output-button, .clear-output-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.run-button {
+  background-color: #48bb78;
+  color: white;
+}
+
+.run-button:hover:not(:disabled) {
+  background-color: #38a169;
+}
+
+.run-button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.toggle-output-button {
+  background-color: #4299e1;
+  color: white;
+}
+
+.toggle-output-button:hover {
+  background-color: #3182ce;
+}
+
+.clear-output-button {
+  background-color: #f56565;
+  color: white;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.clear-output-button:hover {
+  background-color: #e53e3e;
+}
+
+/* Loading Notice */
+.loading-notice {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  color: #856404;
+  font-size: 14px;
+}
+
+/* Output Panel Styles */
+.output-panel {
+  margin-top: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f7fafc;
+  overflow: hidden;
+}
+
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #edf2f7;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.output-header h4 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.output-content {
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2d3748;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow: auto;
+  background-color: #ffffff;
+}
+
+.output-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.output-content::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 4px;
+}
+
+.output-content::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.output-content::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Lesson Content Styles - LeetCode Style */
+.lesson-content {
+  padding: 0;
+  line-height: 1.6;
+  color: #2d3748;
+}
+
+.lesson-content h1 {
+  color: #1a202c;
+  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: 700;
+  border-bottom: 2px solid #4299e1;
+  padding-bottom: 12px;
+}
+
+.lesson-content h2 {
+  color: #2d3748;
+  margin-top: 32px;
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.lesson-content h3 {
+  color: #4a5568;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.lesson-content p {
+  margin-bottom: 16px;
+  color: #4a5568;
+  font-size: 15px;
+}
+
+.lesson-content ul, .lesson-content ol {
+  margin-left: 20px;
+  margin-bottom: 16px;
+}
+
+.lesson-content li {
+  margin-bottom: 8px;
+  color: #4a5568;
+  font-size: 15px;
+}
+
+.lesson-content strong {
+  color: #2b6cb0;
+  font-weight: 600;
+}
+
+.lesson-content ul li strong {
+  color: #38a169;
+}
+
+.lesson-content ol li strong {
+  color: #d69e2e;
+}
+
+/* Graph Example */
+.graph-example {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2d3748;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+/* Tab Styles - Updated for LeetCode style */
+.tab-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-buttons {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 0;
+  background-color: #f7fafc;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px 20px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: #718096;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background-color: #edf2f7;
+  color: #4a5568;
+}
+
+.tab-button.active {
+  background-color: #ffffff;
+  color: #2b6cb0;
+  border-bottom-color: #2b6cb0;
+}
+
+.tab-content {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  background-color: #ffffff;
+}
+
+/* Custom scrollbar for the output area */
+.tab-content .code-editor-container + div div[style*="overflow: auto"] {
+  scrollbar-width: thin;
+  scrollbar-color: #4a5568 #f5f5f5;
+}
+
+.tab-content .code-editor-container + div div[style*="overflow: auto"]::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tab-content .code-editor-container + div div[style*="overflow: auto"]::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.tab-content .code-editor-container + div div[style*="overflow: auto"]::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.tab-content .code-editor-container + div div[style*="overflow: auto"]::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
