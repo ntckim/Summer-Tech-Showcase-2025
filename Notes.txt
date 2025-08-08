@@ -1,2 +1,4 @@
 Algorithm Vis:
     Just ask users to use a list
+Next steps:
+    find tutorial

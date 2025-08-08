@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bellman-Ford Algorithm</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: #ffffff;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #1a202c;
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            border-bottom: 2px solid #4299e1;
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        strong {
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bellman-Ford Algorithm</h1>
+    
+    <h2>Problem Description</h2>
+    <p>
+        Find the shortest path from a source vertex to all other vertices in a weighted graph, even with negative edge weights.
+        The Bellman-Ford algorithm can also detect negative weight cycles.
+    </p>
+
+    <h2>How Bellman-Ford Works</h2>
+    <p>
+        The algorithm relaxes all edges repeatedly. After V-1 iterations, it performs one more iteration to detect negative cycles.
+        If any distance can still be improved, a negative cycle exists.
+    </p>
+
+    <h2>Key Characteristics</h2>
+    <ul>
+        <li><strong>Handles negative weights:</strong> Works with negative edge weights</li>
+        <li><strong>Cycle detection:</strong> Can detect negative weight cycles</li>
+        <li><strong>Dynamic programming:</strong> Uses optimal substructure property</li>
+        <li><strong>Single-source:</strong> Finds shortest paths from one source</li>
+    </ul>
+
+    <h2>Time & Space Complexity</h2>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(VE) where V = vertices, E = edges</li>
+        <li><strong>Space Complexity:</strong> O(V) for distance array</li>
+    </ul>
+</body>
+</html>

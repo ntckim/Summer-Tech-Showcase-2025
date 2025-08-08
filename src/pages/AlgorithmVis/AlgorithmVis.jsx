@@ -11,7 +11,19 @@ export default function AlgorithmVis() {
   const [isResizing, setIsResizing] = useState(false);
   const [activeTab, setActiveTab] = useState('lesson'); // 'lesson' or 'code'
   const [isOutputCollapsed, setIsOutputCollapsed] = useState(false);
+  const [selectedConcept, setSelectedConcept] = useState('dfs');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef(null);
+
+  const concepts = [
+    { id: 'dfs', name: 'Depth-First Search (DFS)', file: 'dfs-concepts.html' },
+    { id: 'bfs', name: 'Breadth-First Search (BFS)', file: 'bfs-concepts.html' },
+    { id: 'dijkstra', name: "Dijkstra's Algorithm", file: 'dijkstra-concepts.html' },
+    { id: 'bellman-ford', name: 'Bellman-Ford Algorithm', file: 'bellman-ford-concepts.html' },
+    { id: 'kruskal', name: "Kruskal's Algorithm (MST)", file: 'kruskal-concepts.html' },
+    { id: 'prim', name: "Prim's Algorithm (MST)", file: 'prim-concepts.html' },
+    { id: 'topological', name: 'Topological Sort', file: 'topological-concepts.html' }
+  ];
 
   const handleMouseDown = (e) => {
     setIsResizing(true);
@@ -36,6 +48,19 @@ export default function AlgorithmVis() {
     setIsResizing(false);
   };
 
+  const handleConceptSelect = (conceptId) => {
+    setSelectedConcept(conceptId);
+    setIsMenuOpen(false);
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const getCurrentConcept = () => {
+    return concepts.find(concept => concept.id === selectedConcept) || concepts[0];
+  };
+
   useEffect(() => {
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
@@ -47,6 +72,19 @@ export default function AlgorithmVis() {
       };
     }
   }, [isResizing]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMenuOpen && !event.target.closest('.concept-menu-container')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   return (
     <Layout title="Algorithm Visualizer - Summer Tech Showcase">
@@ -77,70 +115,35 @@ export default function AlgorithmVis() {
             
             <div className="tab-content">
               {activeTab === 'lesson' && (
-                <div className="lesson-content">
-                  <h1>Depth-First Search (DFS)</h1>
-                  
-                  <h2>Problem Description</h2>
-                  <p>
-                    Implement a Depth-First Search algorithm to traverse a graph. DFS explores as far as possible 
-                    along each branch before backtracking, making it useful for exploring all possible paths in a graph.
-                  </p>
-
-                  <h2>How DFS Works</h2>
-                  <p>
-                    Depth-First Search works by starting at a chosen node and exploring as far as possible along each branch 
-                    before backtracking. Think of it like exploring a maze - you take one path as far as it goes, then 
-                    backtrack to try another path when you hit a dead end.
-                  </p>
-
-                  <h3>Algorithm Steps:</h3>
-                  <ol>
-                    <li>Start at a chosen node (root)</li>
-                    <li>Mark the current node as visited</li>
-                    <li>Explore an unvisited neighbor of the current node</li>
-                    <li>Recursively apply the same process to the neighbor</li>
-                    <li>When you reach a dead end, backtrack to the previous node</li>
-                    <li>Continue until all reachable nodes are visited</li>
-                  </ol>
-
-                  <h2>Key Characteristics</h2>
-                  <ul>
-                    <li><strong>Uses a stack:</strong> Either explicitly (iterative) or implicitly (recursive)</li>
-                    <li><strong>Memory efficient:</strong> Only stores the current path in memory</li>
-                    <li><strong>Complete traversal:</strong> Visits all reachable nodes from the starting point</li>
-                    <li><strong>Order matters:</strong> The order of visiting neighbors affects the traversal path</li>
-                  </ul>
-
-                  <h2>Common Applications</h2>
-                  <ul>
-                    <li>Maze solving and pathfinding</li>
-                    <li>Topological sorting of directed acyclic graphs</li>
-                    <li>Cycle detection in directed graphs</li>
-                    <li>Finding connected components</li>
-                    <li>Game tree exploration and analysis</li>
-                  </ul>
-
-                  <h2>Time & Space Complexity</h2>
-                  <ul>
-                    <li><strong>Time Complexity:</strong> O(V + E) where V = vertices, E = edges</li>
-                    <li><strong>Space Complexity:</strong> O(V) in worst case (when graph is a straight line)</li>
-                  </ul>
-
-                  <h2>Example</h2>
-                  <p>
-                    Given the graph below, a DFS starting from node 0 would visit nodes in this order: 0 → 1 → 3 → 4 → 7 → 2 → 5 → 6
-                  </p>
-                  <pre className="graph-example">
-{`Graph (Adjacency List):
-0: [1, 2]
-1: [0, 3, 4]
-2: [0, 5, 6]
-3: [1]
-4: [1, 7]
-5: [2]
-6: [2]
-7: [4]`}
-                  </pre>
+                <div className="concepts-iframe-container">
+                  <div className="concept-menu-container">
+                    <button 
+                      className="concept-menu-button"
+                      onClick={toggleMenu}
+                    >
+                      {getCurrentConcept().name}
+                      <span className={`menu-arrow ${isMenuOpen ? 'open' : ''}`}>▼</span>
+                    </button>
+                    {isMenuOpen && (
+                      <div className="concept-menu-dropdown">
+                        {concepts.map(concept => (
+                          <button
+                            key={concept.id}
+                            className={`concept-menu-item ${selectedConcept === concept.id ? 'active' : ''}`}
+                            onClick={() => handleConceptSelect(concept.id)}
+                          >
+                            {concept.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <iframe 
+                    src={`/dfs-pages/${getCurrentConcept().file}`}
+                    className="concepts-iframe"
+                    title={getCurrentConcept().name}
+                    key={selectedConcept}
+                  />
                 </div>
               )}
               

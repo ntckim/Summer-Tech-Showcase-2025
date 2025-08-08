@@ -1,11 +1,13 @@
 .grid-container {
     display: flex;
     height: calc(100vh - 200px); /* Account for header and footer */
-    width: 100%;
+    width: 100vw;
     overflow: hidden;
     position: relative;
     margin: -2rem; /* Offset the main-content padding */
     margin-top: 0;
+    margin-left: calc(-50vw + 50%); /* Break out of centered container */
+    margin-right: calc(-50vw + 50%); /* Break out of centered container */
 }
 
 .left-side {
@@ -501,4 +503,112 @@
 
 .tab-content .code-editor-container + div div[style*="overflow: auto"]::-webkit-scrollbar-thumb:hover {
   background: #718096;
+}
+
+/* Concepts iframe styles */
+.concepts-iframe-container {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.concepts-iframe {
+  width: 100%;
+  flex: 1;
+  border: none;
+  display: block;
+  background-color: #ffffff;
+}
+
+/* Concept menu styles */
+.concept-menu-container {
+  position: relative;
+  margin-bottom: 12px;
+  z-index: 1000;
+}
+
+.concept-menu-button {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.concept-menu-button:hover {
+  background-color: #3182ce;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.menu-arrow {
+  transition: transform 0.2s ease;
+  font-size: 12px;
+}
+
+.menu-arrow.open {
+  transform: rotate(180deg);
+}
+
+.concept-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.concept-menu-item {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: white;
+  color: #2d3748;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.concept-menu-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.concept-menu-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.concept-menu-item:hover {
+  background-color: #f7fafc;
+  color: #1a202c;
+}
+
+.concept-menu-item.active {
+  background-color: #ebf8ff;
+  color: #2b6cb0;
+  font-weight: 600;
+}
+
+.concept-menu-item.active:hover {
+  background-color: #bee3f8;
 }
