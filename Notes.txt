@@ -15,7 +15,6 @@ Algorithm Vis:
     ```
 Next steps:
     find tutorial
-<<<<<<< HEAD
 
 O/theta notation
 dfs
@@ -28,5 +27,3 @@ MST
  - kruskal
  - (union find)
 Flow
-=======
->>>>>>> 0c8f5f2a9aae9964be23b573aa018d0bb1ff9017

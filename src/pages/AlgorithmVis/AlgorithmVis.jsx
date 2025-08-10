@@ -19,13 +19,15 @@ export default function AlgorithmVis() {
   const containerRef = useRef(null);
 
   const concepts = [
+    { id: 'bigO', name: 'Big O Notation', file: 'bigO-notation-concepts.html' },
     { id: 'dfs', name: 'Depth-First Search (DFS)', file: 'dfs-concepts.html' },
     { id: 'bfs', name: 'Breadth-First Search (BFS)', file: 'bfs-concepts.html' },
     { id: 'dijkstra', name: "Dijkstra's Algorithm", file: 'dijkstra-concepts.html' },
     { id: 'bellman-ford', name: 'Bellman-Ford Algorithm', file: 'bellman-ford-concepts.html' },
+    { id: 'MST', name: 'Minimum Spanning Tree', file: 'MST-concepts.html' },
     { id: 'kruskal', name: "Kruskal's Algorithm (MST)", file: 'kruskal-concepts.html' },
     { id: 'prim', name: "Prim's Algorithm (MST)", file: 'prim-concepts.html' },
-    { id: 'topological', name: 'Topological Sort', file: 'topological-concepts.html' }
+    { id: 'unionFind', name: 'Union-Find Data Structure', file: 'UnionFind-Concepts.html' }
   ];
 
   // Initialize Pyodide when the page loads
