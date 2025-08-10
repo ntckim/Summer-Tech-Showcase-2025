@@ -1,2 +1,15 @@
 Algorithm Vis:
-    Just ask users to use a list
+    Just ask users to use a list of which nodes they visited in order
+    Code that we will run to check that visited list with timeout logic if theres an infinte loop:
+    ```
+    import time, thread
+    visited = []
+    start_time = time.time()
+    dfs_thread = threading.Thread(target=dfs, args=(visited))
+    dfs_thread.start()
+    while time.time() - start_time < 20000 and dfs_thread.is_alive():
+       time.sleep(0.1)
+    if dfs_thread.is_alive():
+      print("timeout")
+    return visited
+    ```
