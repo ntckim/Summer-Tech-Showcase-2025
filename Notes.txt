@@ -2,3 +2,15 @@ Algorithm Vis:
     Just ask users to use a list
 Next steps:
     find tutorial
+
+O/theta notation
+dfs
+bfs
+dijkstras
+bellman-ford
+topological sort
+MST
+ - prim
+ - kruskal
+ - (union find)
+Flow
