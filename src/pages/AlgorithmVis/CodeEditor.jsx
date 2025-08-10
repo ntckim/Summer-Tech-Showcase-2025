@@ -7,7 +7,6 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { lineNumbers } from '@codemirror/view';
 import { bracketMatching } from '@codemirror/language';
 import { closeBrackets } from '@codemirror/autocomplete';
-import { loadPyodide } from 'pyodide';
 
 export default function CodeEditor({
   graphOrdering,
@@ -15,37 +14,28 @@ export default function CodeEditor({
   runGraph,
   setRunGraph,
   isOutputCollapsed,
-  setIsOutputCollapsed
+  setIsOutputCollapsed,
+  pyodide,
+  isPyodideLoading
 }) {
   const editorRef = useRef(null);
   const [output, setOutput] = useState('');
   const [editorView, setEditorView] = useState(null);
-  const [pyodide, setPyodide] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   setRunGraph(false)
 
   console.log(runGraph)
 
-  // Initialize Pyodide
-  useEffect(() => {
-    const initPyodide = async () => {
-      try {
-        setOutput('Loading Python interpreter...');
-        const pyodideInstance = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/"
-        });
-        setPyodide(pyodideInstance);
-        setOutput('Python interpreter loaded successfully! Ready to run code.');
-        setIsLoading(false);
-      } catch (error) {
-        setOutput(`Error loading Python interpreter: ${error.message}`);
-        setIsLoading(false);
-      }
-    };
+  // Remove the Pyodide initialization useEffect since it's now handled by the parent
 
-    initPyodide();
-  }, []);
+  // Update output when Pyodide is ready
+  useEffect(() => {
+    if (pyodide && !isPyodideLoading) {
+      setOutput('Python interpreter ready! You can now run your code.');
+    } else if (isPyodideLoading) {
+      setOutput('Loading Python interpreter... Please wait.');
+    }
+  }, [pyodide, isPyodideLoading]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -261,10 +251,10 @@ if __name__ == "__main__":
         <div className="editor-controls">
           <button 
             onClick={runCode}
-            disabled={isLoading || !pyodide}
+            disabled={isPyodideLoading || !pyodide}
             className="run-button"
           >
-            {isLoading ? 'Loading...' : 'Run Code'}
+            {isPyodideLoading ? 'Loading...' : 'Run Code'}
           </button>
           <button 
             onClick={() => setIsOutputCollapsed(!isOutputCollapsed)}
@@ -275,7 +265,7 @@ if __name__ == "__main__":
         </div>
       </div>
 
-      {isLoading && (
+      {isPyodideLoading && (
         <div className="loading-notice">
           ⏳ Loading Python interpreter... This may take a moment on first load.
         </div>

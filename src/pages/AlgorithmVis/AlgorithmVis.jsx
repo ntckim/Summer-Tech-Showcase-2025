@@ -3,6 +3,7 @@ import CodeEditor from './CodeEditor';
 import CustomPathGraph from './Graph';
 import './AlgorithmVis.css';
 import Layout from '../../layouts/Layout';
+import { loadPyodide } from 'pyodide';
 
 export default function AlgorithmVis() {
   const [graphOrdering, setSharedData] = useState(null);
@@ -13,6 +14,8 @@ export default function AlgorithmVis() {
   const [isOutputCollapsed, setIsOutputCollapsed] = useState(false);
   const [selectedConcept, setSelectedConcept] = useState('dfs');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [pyodide, setPyodide] = useState(null);
+  const [isPyodideLoading, setIsPyodideLoading] = useState(true);
   const containerRef = useRef(null);
 
   const concepts = [
@@ -24,6 +27,26 @@ export default function AlgorithmVis() {
     { id: 'prim', name: "Prim's Algorithm (MST)", file: 'prim-concepts.html' },
     { id: 'topological', name: 'Topological Sort', file: 'topological-concepts.html' }
   ];
+
+  // Initialize Pyodide when the page loads
+  useEffect(() => {
+    const initPyodide = async () => {
+      try {
+        console.log('Loading Python interpreter...');
+        const pyodideInstance = await loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/"
+        });
+        setPyodide(pyodideInstance);
+        setIsPyodideLoading(false);
+        console.log('Python interpreter loaded successfully!');
+      } catch (error) {
+        console.error('Error loading Python interpreter:', error);
+        setIsPyodideLoading(false);
+      }
+    };
+
+    initPyodide();
+  }, []);
 
   const handleMouseDown = (e) => {
     setIsResizing(true);
@@ -88,6 +111,11 @@ export default function AlgorithmVis() {
 
   return (
     <Layout title="Algorithm Visualizer - Summer Tech Showcase">
+      {isPyodideLoading && (
+        <div className="pyodide-loading-banner">
+          ⏳ Loading Python interpreter... This may take a moment on first load.
+        </div>
+      )}
       <div 
         className="grid-container" 
         ref={containerRef}
@@ -155,6 +183,8 @@ export default function AlgorithmVis() {
                   setRunGraph={setRunGraph}
                   isOutputCollapsed={isOutputCollapsed}
                   setIsOutputCollapsed={setIsOutputCollapsed}
+                  pyodide={pyodide}
+                  isPyodideLoading={isPyodideLoading}
                 />
               )}
             </div>
