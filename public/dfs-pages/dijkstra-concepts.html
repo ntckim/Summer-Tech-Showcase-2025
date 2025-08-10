@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijkstra's Algorithm</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: #ffffff;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #1a202c;
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            border-bottom: 2px solid #4299e1;
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        strong {
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dijkstra's Algorithm</h1>
+    
+    <h2>Problem Description</h2>
+    <p>
+        Find the shortest path from a source vertex to all other vertices in a weighted graph with non-negative edge weights.
+        Dijkstra's algorithm is a greedy algorithm that builds the shortest path tree incrementally.
+    </p>
+
+    <h2>How Dijkstra's Works</h2>
+    <p>
+        The algorithm maintains a set of vertices whose shortest distance from the source is known. 
+        It repeatedly selects the vertex with minimum distance and relaxes all its adjacent vertices.
+    </p>
+
+    <h2>Key Characteristics</h2>
+    <ul>
+        <li><strong>Greedy approach:</strong> Always chooses the locally optimal choice</li>
+        <li><strong>Non-negative weights:</strong> Cannot handle negative edge weights</li>
+        <li><strong>Single-source:</strong> Finds shortest paths from one source to all vertices</li>
+        <li><strong>Optimal substructure:</strong> Optimal solution contains optimal sub-solutions</li>
+    </ul>
+
+    <h2>Time & Space Complexity</h2>
+    <ul>
+        <li><strong>Time Complexity:</strong> O((V + E) log V) with binary heap</li>
+        <li><strong>Space Complexity:</strong> O(V) for distance array and priority queue</li>
+    </ul>
+</body>
+</html>
