@@ -642,3 +642,114 @@
 .concept-menu-item.active:hover {
   background-color: #bee3f8;
 }
+
+/* Example Selector */
+.example-selector {
+  padding: 10px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.example-dropdown {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.example-dropdown:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+/* Graph Layout Controls */
+.layout-section {
+  border-top: 1px solid #dee2e6;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.layout-section-title {
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #495057;
+  text-align: center;
+}
+
+.layout-button {
+  font-size: 10px;
+  padding: 4px 6px;
+  margin: 1px 0;
+  background: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.layout-button:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.layout-button:active {
+  transform: translateY(1px);
+}
+
+/* Path Indicator */
+.path-indicator {
+  font-size: 11px;
+  text-align: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.path-indicator.default {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.path-indicator.custom {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+.path-indicator:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Backtracking Animation */
+@keyframes backtracking-pulse {
+  0% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}
+
+.backtracking {
+  animation: backtracking-pulse 0.6s ease-in-out;
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  line-color: #ffc107 !important;
+  target-arrow-color: #ffc107 !important;
+}

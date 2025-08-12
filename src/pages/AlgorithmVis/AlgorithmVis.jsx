@@ -4,6 +4,7 @@ import CustomPathGraph from './Graph';
 import './AlgorithmVis.css';
 import Layout from '../../layouts/Layout';
 import { loadPyodide } from 'pyodide';
+import { getExamplesForAlgorithm } from './graphExamples';
 
 export default function AlgorithmVis() {
   const [graphOrdering, setSharedData] = useState(null);
@@ -17,7 +18,8 @@ export default function AlgorithmVis() {
   const [pyodide, setPyodide] = useState(null);
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
   const containerRef = useRef(null);
-
+  const [selectedExample, setSelectedExample] = useState('simple');
+  
   const concepts = [
     { id: 'bigO', name: 'Big O Notation', file: 'bigO-notation-concepts.html' },
     { id: 'dfs', name: 'Depth-First Search (DFS)', file: 'dfs-concepts.html' },
@@ -111,6 +113,19 @@ export default function AlgorithmVis() {
     };
   }, [isMenuOpen]);
 
+  // Get available examples for current concept
+  const currentExamples = getExamplesForAlgorithm(selectedConcept);
+  const currentExample = currentExamples[selectedExample] || currentExamples.simple;
+
+  useEffect(() => {
+    if (currentExample) {
+      // setNodes(currentExample.nodes); // These lines were removed from the new_code, so they are removed here.
+      // setEdges(currentExample.edges);
+      // Reset animation state
+      // resetAnimation();
+    }
+  }, [selectedConcept, selectedExample]);
+
   return (
     <Layout title="Algorithm Visualizer - Summer Tech Showcase">
       {isPyodideLoading && (
@@ -200,9 +215,26 @@ export default function AlgorithmVis() {
           className="right-side"
           style={{ width: `${100 - leftWidth}%` }}
         >
+          {/* Add example selector */}
+          <div className="example-selector">
+            <select 
+              value={selectedExample} 
+              onChange={(e) => setSelectedExample(e.target.value)}
+              className="example-dropdown"
+            >
+              {Object.keys(currentExamples).map(exampleKey => (
+                <option key={exampleKey} value={exampleKey}>
+                  {currentExamples[exampleKey].name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
           <CustomPathGraph 
             graphOrdering={graphOrdering} 
             runGraph={runGraph}
+            selectedConcept={selectedConcept}
+            selectedExample={selectedExample}
           />
         </div>
       </div>
