@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kruskal's Algorithm</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: #ffffff;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #1a202c;
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            border-bottom: 2px solid #4299e1;
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        strong {
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kruskal's Algorithm (MST)</h1>
+    
+    <h2>Problem Description</h2>
+    <p>
+        Find the Minimum Spanning Tree (MST) of a connected, undirected graph. A spanning tree connects all vertices
+        with the minimum total edge weight and no cycles.
+    </p>
+
+    <h2>How Kruskal's Works</h2>
+    <p>
+        The algorithm sorts all edges by weight and greedily adds the smallest weight edge that doesn't create a cycle.
+        It uses Union-Find data structure to efficiently detect cycles.
+    </p>
+
+    <h2>Key Characteristics</h2>
+    <ul>
+        <li><strong>Greedy approach:</strong> Always selects minimum weight edge</li>
+        <li><strong>Edge-based:</strong> Considers edges in sorted order</li>
+        <li><strong>Union-Find:</strong> Uses disjoint set data structure</li>
+        <li><strong>Cycle avoidance:</strong> Ensures no cycles in spanning tree</li>
+    </ul>
+
+    <h2>Time & Space Complexity</h2>
+    <ul>
+        <li><strong>Time Complexity:</strong> O(E log E) for sorting edges</li>
+        <li><strong>Space Complexity:</strong> O(V) for Union-Find structure</li>
+    </ul>
+</body>
+</html>
