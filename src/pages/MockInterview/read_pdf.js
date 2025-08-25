@@ -1,33 +1,25 @@
-import fs from 'fs';
-import pdfParse from 'pdf-parse';
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
+const fetch = require('node-fetch'); // Install via `npm install node-fetch`
+const { OPENROUTER_CONFIG, validateConfig } = require('./config.cjs');
 
-/*
-* Removes personal information (name, email, phone, linked in and github profiles)
-* Identifies sections (education, skills, etc) by adding a tag "SECTION: " for the 
-* AI to better interpret 
-*
-* @param {string} text - full text parsed from PDF
-* @returns {string} processed text
-*/
+// Your combined helper function
 function process_resume(text) {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     let firstLineRedacted = false;
     let processedText = '';
     const sectionHeaderRegex = /^([A-Z ]{2,})\s*[_-]*$/;
 
-    // Regex patterns for personal info
     const emailRegex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
     const phoneRegex = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/g;
     const linkedinRegex = /https?:\/\/(www\.)?linkedin\.com\/[A-Za-z0-9_-]+\/?/gi;
     const githubRegex = /https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_-]+\/?/gi;
 
     for (let line of lines) {
-        // Step 1: Redact first line (name)
         if (!firstLineRedacted) {
             line = '[REDACTED NAME]';
             firstLineRedacted = true;
         } else {
-            // Step 2: Redact other personal info
             line = line
                 .replace(emailRegex, '[REDACTED EMAIL]')
                 .replace(phoneRegex, '[REDACTED PHONE]')
@@ -35,7 +27,6 @@ function process_resume(text) {
                 .replace(githubRegex, '[REDACTED GITHUB]');
         }
 
-        // Step 3: Identify section headers
         const match = line.match(sectionHeaderRegex);
         if (match) {
             const section = match[1].trim();
@@ -50,18 +41,58 @@ function process_resume(text) {
 
 async function main() {
     try {
+        // Read and parse PDF
         const pdfPath = './Martin Utrera Tech Resume - 2025.pdf';
         const pdffile = fs.readFileSync(pdfPath);
-
         const data = await pdfParse(pdffile);
-        console.log('=== Original Text ===\n', data.text.slice(0, 500), '...\n');
 
+        // Redact + identify sections (reuse your combined function)
         const processedText = process_resume(data.text);
-        console.log('=== Processed Text ===\n', processedText.slice(0, 3000), '...\n');
 
-        // Now processedText is ready to feed to your AI
+        // Build the prompt
+        const prompt = `Here is my resume. In your opinion, what are the biggest strenghts of this resume?\n\n${processedText}`;
+
+        // Validate API key
+        validateConfig()
+
+        // Send to OpenRouter
+        const response = await fetch(`${OPENROUTER_CONFIG.baseUrl}/chat/completions`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${OPENROUTER_CONFIG.apiKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: OPENROUTER_CONFIG.model,
+                messages: [
+                  {
+                    role: "system",
+                    content: "You are an expert technical interviewer and career coach."
+                  },
+                  {
+                    role: "user",
+                    content: prompt
+                  }
+                ],
+                temperature: OPENROUTER_CONFIG.temperature,
+                max_tokens: OPENROUTER_CONFIG.maxTokens
+              })
+            });
+        
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(
+                `OpenRouter API error: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`
+              );
+            }
+
+        const result = await response.json();
+        const aiReply = result.choices?.[0]?.message?.content;
+
+        console.log('=== AI Response ===\n', aiReply);
+
     } catch (err) {
-        console.error('Error parsing PDF:', err);
+        console.error('Error:', err);
     }
 }
 
