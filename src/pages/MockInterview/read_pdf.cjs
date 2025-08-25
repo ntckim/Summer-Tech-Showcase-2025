@@ -1,7 +1,25 @@
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const fetch = require('node-fetch'); // Install via `npm install node-fetch`
-const { OPENROUTER_CONFIG, validateConfig } = require('./config.cjs');
+
+const OPENROUTER_CONFIG = {
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseUrl: 'https://openrouter.ai/api/v1',
+  model: 'deepseek/deepseek-chat-v3-0324:free',
+  temperature: 0.7,
+  maxTokens: 2000
+};
+
+// Validation function to check if API key is configured
+function validateConfig() {
+  if (!OPENROUTER_CONFIG.apiKey || OPENROUTER_CONFIG.apiKey === 'undefined') {
+    throw new Error(
+      'OpenRouter API key not configured. Please create a .env file in the root directory with:\n' +
+      'VITE_OPENROUTER_API_KEY=your_actual_openrouter_api_key_here'
+    );
+  }
+  return true;
+} 
 
 // Your combined helper function
 function process_resume(text) {
@@ -74,8 +92,8 @@ async function main() {
                     content: prompt
                   }
                 ],
-                temperature: OPENROUTER_CONFIG.temperature,
-                max_tokens: OPENROUTER_CONFIG.maxTokens
+                temperature: 0.7,
+                max_tokens: 2000
               })
             });
         
