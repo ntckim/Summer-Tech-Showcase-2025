@@ -16,7 +16,7 @@ export async function generateInterviewQuestions(formData) {
     const prompt = createPrompt(formData, resumeText);
 
     // read master prompt from .txt file
-    const master_prompt = fs.readFileSync('./model_output.txt', 'utf-8');
+    const master_prompt = fs.readFileSync('./model_prompt.txt', 'utf-8');
 
     // Make HTTP request to OpenRouter
     const response = await fetch(`${OPENROUTER_CONFIG.baseUrl}/chat/completions`, {

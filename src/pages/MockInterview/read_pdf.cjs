@@ -12,7 +12,7 @@ const OPENROUTER_CONFIG = {
   baseUrl: 'https://openrouter.ai/api/v1',
   model: 'deepseek/deepseek-chat-v3-0324:free',
   temperature: 0.7,
-  maxTokens: 6000
+  maxTokens: 2500
 };
 
 // Validation function to check if API key is configured
@@ -73,10 +73,10 @@ TARGET COMPANIES:
 2. Amazon
 
 IMPROVEMENT AREAS:
-I need to practice speaking about conflict resolution for project developments
+Not specified
 
 ADDITIONAL NOTES:
-"None provided"
+Not specififed
 
 REQUIREMENTS:
 1. Generate exactly 10 questions
@@ -96,6 +96,49 @@ Do not provide any other output besides the 10 questions`;
 
   return prompt;
 }
+
+function parseQuestionsFromResponse(response) {
+  const rawLines = response.split("\n");
+  const questions = [];
+  let buffer = "";
+
+  rawLines.forEach((line) => {
+    // Detect new question by checking either [Company] or **[Company]**
+    if (line.match(/^\d+\.\s*(\*\*)?\[[^\]]+\](\*\*)?/)) {
+      if (buffer) {
+        questions.push(parseSingleQuestion(buffer));
+      }
+      buffer = line.trim();
+    } else if (line.trim()) {
+      buffer += " " + line.trim();
+    }
+  });
+
+  if (buffer) {
+    questions.push(parseSingleQuestion(buffer));
+  }
+
+  return questions;
+}
+
+function parseSingleQuestion(text) {
+  // Match both **[Company]** and [Company]
+  const match = text.match(/^\d+\.\s*(?:\*\*)?\[([^\]]+)\](?:\*\*)?\s*(.+)/);
+  if (match) {
+    return {
+      company: match[1].trim(),
+      question: match[2].trim(),
+      fullText: text
+    };
+  } else {
+    return {
+      company: "General",
+      question: text.replace(/^\d+\.\s*/, "").trim(),
+      fullText: text
+    };
+  }
+}
+
 async function main() {
     try {
         // Read and parse PDF
@@ -106,7 +149,8 @@ async function main() {
         // Redact + identify sections (reuse your combined function)
         const processedText = process_resume(data.text);
 
-        // 
+        // System prompt
+        const masterPrompt = fs.readFileSync('./model_output.txt', 'utf-8');
 
         // Build the prompt
         const prompt = createPrompt(processedText)
@@ -126,7 +170,7 @@ async function main() {
                 messages: [
                   {
                     role: "system",
-                    content: "You are an expert technical interviewer and career coach."
+                    content: masterPrompt
                   },
                   {
                     role: "user",
@@ -134,7 +178,7 @@ async function main() {
                   }
                 ],
                 temperature: 0.7,
-                max_tokens: 2000
+                max_tokens: 3000
               })
             });
         
@@ -147,8 +191,10 @@ async function main() {
 
         const result = await response.json();
         const aiReply = result.choices?.[0]?.message?.content;
+        
+        const parsed_questions = parseQuestionsFromResponse(aiReply)
 
-        console.log('=== AI Response ===\n', aiReply);
+        console.log(parsed_questions)
 
     } catch (err) {
         console.error('Error:', err);
