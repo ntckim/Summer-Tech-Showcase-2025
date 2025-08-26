@@ -147,7 +147,7 @@ export default function InterviewSession({
         {
           type: "interviewer",
           content:
-            "That’s all the questions. Nice work—review the transcript and refine your answers.",
+            "That’s all the questions. Nice work!. Review the transcript and refine your answers.",
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
