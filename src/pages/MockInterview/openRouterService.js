@@ -1,4 +1,5 @@
 import { OPENROUTER_CONFIG, validateConfig } from "./config.js";
+const fs = require('fs');
 
 export async function generateInterviewQuestions(formData) {
   try {
@@ -8,11 +9,14 @@ export async function generateInterviewQuestions(formData) {
     // Read the resume file content
     let resumeText = "";
     if (formData.resume) {
-      resumeText = await readResumeFile(formData.resume);
+      resumeText = await readResumeFile(formData.resume); //assuming this pulls the resume file and not metadata or anything else
     }
 
     // Create a comprehensive prompt for the AI model
     const prompt = createPrompt(formData, resumeText);
+
+    // read master prompt from .txt file
+    const master_prompt = fs.readFileSync('./model_output.txt', 'utf-8');
 
     // Make HTTP request to OpenRouter
     const response = await fetch(`${OPENROUTER_CONFIG.baseUrl}/chat/completions`, {
@@ -28,7 +32,7 @@ export async function generateInterviewQuestions(formData) {
         messages: [
           {
             role: "system",
-            content: "You are an expert technical interviewer and career coach. Your task is to generate 10 highly relevant interview questions based on the candidate's resume, target companies, and improvement areas. Make questions specific and tailored to the individual."
+            content: master_prompt
           },
           {
             role: "user",
@@ -75,10 +79,11 @@ export async function generateInterviewQuestions(formData) {
   }
 }
 
+
 function createPrompt(formData, resumeText) {
   const { companies, improvementAreas, notes } = formData;
 
-  let prompt = `Generate 10 interview questions for a candidate based on the following information:
+  let prompt = `Generate 10 interview questions for a interviewee based on the following information:
 
 RESUME CONTENT:
 ${resumeText}
@@ -105,76 +110,127 @@ FORMAT YOUR RESPONSE AS:
 2. [Company Tag] Question text here
 ...and so on
 
-Make the questions challenging but appropriate for the candidate's level.`;
+Make the questions challenging but appropriate for the candidate's level.
+Do not provide any other output besides the 10 questions`;
 
   return prompt;
+}
+
+function process_resume(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    let firstLineRedacted = false;
+    let processedText = '';
+    const sectionHeaderRegex = /^([A-Z ]{2,})\s*[_-]*$/;
+
+    const emailRegex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
+    const phoneRegex = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/g;
+    const linkedinRegex = /https?:\/\/(www\.)?linkedin\.com\/[A-Za-z0-9_-]+\/?/gi;
+    const githubRegex = /https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_-]+\/?/gi;
+
+    for (let line of lines) {
+        if (!firstLineRedacted) {
+            line = '[REDACTED NAME]';
+            firstLineRedacted = true;
+        } else {
+            line = line
+                .replace(emailRegex, '[REDACTED EMAIL]')
+                .replace(phoneRegex, '[REDACTED PHONE]')
+                .replace(linkedinRegex, '[REDACTED LINKEDIN]')
+                .replace(githubRegex, '[REDACTED GITHUB]');
+        }
+
+        const match = line.match(sectionHeaderRegex);
+        if (match) {
+            const section = match[1].trim();
+            processedText += `\n--- SECTION: ${section} ---\n`;
+        } else {
+            processedText += line + ' ';
+        }
+    }
+
+    return processedText;
 }
 
 async function readResumeFile(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
+
     reader.onload = (e) => {
       try {
+        let rawText;
+
         if (file.type === "application/pdf") {
-          // For PDF files, we'll extract text content if possible
-          // This is a simplified approach - in production you might want to use a PDF parsing library
-          resolve(
-            `[PDF Resume: ${file.name}] - Content would be extracted here. For now, please ensure your resume highlights your key skills, experiences, and achievements.`
-          );
+          // PDF files need proper parsing — this is a placeholder
+          rawText = `[PDF Resume: ${file.name}] - Content would be extracted here.`;
         } else if (
           file.type === "text/plain" ||
           file.type === "text/markdown"
         ) {
-          // For text files, we can read the content directly
-          resolve(e.target.result);
+          rawText = e.target.result;
         } else {
-          // For other file types, provide a generic message
-          resolve(
-            `[Resume File: ${file.name}] - Please ensure your resume highlights your key skills, experiences, and achievements.`
-          );
+          rawText = `[Resume File: ${file.name}] - Please ensure your resume highlights your key skills, experiences, and achievements.`;
         }
+
+        // Process the raw text through your existing function
+        const processed = process_resume(rawText);
+        resolve(processed);
+
       } catch (err) {
         resolve(
-          `[Resume File: ${file.name}] - Content could not be read. Please ensure your resume highlights your key skills, experiences, and achievements.`
+          `[Resume File: ${file.name}] - Content could not be read.`
         );
       }
     };
+
     reader.onerror = () => {
       resolve(
-        `[Resume File: ${file.name}] - Content could not be read. Please ensure your resume highlights your key skills, experiences, and achievements.`
+        `[Resume File: ${file.name}] - Content could not be read.`
       );
     };
+
     reader.readAsText(file);
   });
 }
 
 function parseQuestionsFromResponse(response) {
-  // Parse the numbered questions from the AI response
-  const lines = response.split("\n").filter((line) => line.trim());
+  const rawLines = response.split("\n");
   const questions = [];
+  let buffer = "";
 
-  lines.forEach((line) => {
-    // Look for numbered lines (1., 2., etc.)
-    const match = line.match(/^\d+\.\s*\[([^\]]+)\]\s*(.+)/);
-    if (match) {
-      const company = match[1].trim();
-      const question = match[2].trim();
-      questions.push({
-        company,
-        question,
-        fullText: line.trim(),
-      });
+  rawLines.forEach((line) => {
+    // Detect new question by checking either [Company] or **[Company]**
+    if (line.match(/^\d+\.\s*(\*\*)?\[[^\]]+\](\*\*)?/)) {
+      if (buffer) {
+        questions.push(parseSingleQuestion(buffer));
+      }
+      buffer = line.trim();
+    } else if (line.trim()) {
+      buffer += " " + line.trim();
     }
   });
 
-  // If parsing fails, fallback to simple line splitting
-  if (questions.length === 0) {
-    return lines.slice(0, 10).map((line) => ({
-      company: "General",
-      question: line.replace(/^\d+\.\s*/, ""),
-      fullText: line.trim(),
-    }));
+  if (buffer) {
+    questions.push(parseSingleQuestion(buffer));
   }
 
   return questions;
 }
+
+function parseSingleQuestion(text) {
+  // Match both **[Company]** and [Company]
+  const match = text.match(/^\d+\.\s*(?:\*\*)?\[([^\]]+)\](?:\*\*)?\s*(.+)/);
+  if (match) {
+    return {
+      company: match[1].trim(),
+      question: match[2].trim(),
+      fullText: text
+    };
+  } else {
+    return {
+      company: "General",
+      question: text.replace(/^\d+\.\s*/, "").trim(),
+      fullText: text
+    };
+  }
+}
+
