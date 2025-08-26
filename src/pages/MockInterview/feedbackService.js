@@ -1,7 +1,5 @@
 import { OPENROUTER_CONFIG, validateConfig } from "./config.js";
-const fs = require('fs');
-
-const masterPrompt = fs.readFileSync('./model_prompt.txt', 'utf-8');
+import masterPrompt from './model_prompt.txt?raw';
 
 export async function generateFeedback(
   answer,
