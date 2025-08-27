@@ -62,30 +62,174 @@ export default function MockInterview() {
   };
 
   // ---------------- PDF TRANSCRIPT ----------------
+  // ---------------- PDF TRANSCRIPT ----------------
   const viewTranscript = () => {
     if (!finalConversation.length) {
-      return alert("No conversation available yet!");
+      alert("No conversation available yet!");
+      return;
     }
 
-    const doc = new jsPDF();
-    let yOffset = 10;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+
+    // Layout
+    const M = 56; // page margin
+    const headerH = 54;
+    const footerH = 40;
+    const contentW = pageW - M * 2;
+    let y = M + headerH;
+
+    const title = "Mock Interview Transcript";
+    const sub = new Date().toLocaleString();
+
+    // Colors
+    const text = [20, 20, 20];
+    const muted = [110, 110, 110];
+    const bg = [248, 248, 248];
+    const interviewerFill = [232, 240, 255];
+    const candidateFill = [240, 240, 240];
+    const pillInterviewer = [37, 99, 235];
+    const pillCandidate = [75, 85, 99];
+
+    const TOTAL_PLACEHOLDER = "{total_pages}";
+
+    const drawHeader = () => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(...text);
+      doc.text(title, M, M + 18);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(...muted);
+      doc.text(sub, M, M + 36);
+
+      // Divider
+      doc.setDrawColor(220, 220, 220);
+      doc.line(M, M + headerH - 10, pageW - M, M + headerH - 10);
+    };
+
+    const drawFooter = (pageNum) => {
+      // Divider
+      doc.setDrawColor(220, 220, 220);
+      doc.line(
+        M,
+        pageH - M - footerH + 10,
+        pageW - M,
+        pageH - M - footerH + 10
+      );
+
+      // Page numbers
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...muted);
+      const txt = `Page ${pageNum} of ${TOTAL_PLACEHOLDER}`;
+      doc.text(txt, pageW - M, pageH - M - 14, { align: "right" });
+    };
+
+    // Draw background FIRST so it doesn't cover header/footer
+    const paintBackground = () => {
+      doc.setFillColor(...bg);
+      doc.rect(0, 0, pageW, pageH, "F");
+    };
+
+    let pageNum = 1;
+    paintBackground();
+    drawHeader();
+    drawFooter(pageNum);
+
+    const addPage = () => {
+      doc.addPage();
+      pageNum += 1;
+      paintBackground();
+      drawHeader();
+      drawFooter(pageNum);
+      y = M + headerH;
+    };
+
+    const ensureSpace = (neededHeight) => {
+      if (y + neededHeight > pageH - M - footerH) addPage();
+    };
+
+    const drawMessage = (role, timestamp, content) => {
+      const isInterviewer = role === "interviewer";
+      const roleLabel = isInterviewer ? "Interviewer" : "You";
+      const pillColor = isInterviewer ? pillInterviewer : pillCandidate;
+      const bubbleFill = isInterviewer ? interviewerFill : candidateFill;
+
+      // Role pill sizing
+      const pillH = 20;
+      const pillPadX = 8;
+      const pillPadY = 4;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      const pillTextW = doc.getTextWidth(roleLabel);
+      const pillW = pillTextW + pillPadX * 2;
+
+      // Body wrap
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.setTextColor(...text);
+      const bodyLines = doc.splitTextToSize(
+        String(content || ""),
+        contentW - 20
+      );
+      const bodyHeight = bodyLines.length * 14;
+      const blockH = pillH + 8 + bodyHeight + 16;
+
+      ensureSpace(blockH);
+
+      // Top line: role pill + timestamp
+      const x = M;
+      const pillY = y;
+
+      // Pill
+      doc.setFillColor(...pillColor);
+      doc.roundedRect(x, pillY, pillW, pillH, 6, 6, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text(roleLabel, x + pillPadX, pillY + pillH - pillPadY - 3);
+
+      // Timestamp
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...muted);
+      const tsText = ` (${timestamp})`;
+      doc.text(tsText, x + pillW + 6, pillY + pillH - pillPadY - 3);
+
+      // Bubble
+      const bubbleY = pillY + pillH + 8;
+      const bubbleH = bodyHeight + 16;
+      doc.setFillColor(...bubbleFill);
+      doc.setDrawColor(230, 230, 230);
+      doc.roundedRect(x, bubbleY, contentW, bubbleH, 8, 8, "FD");
+
+      // Body
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.setTextColor(...text);
+      doc.text(bodyLines, x + 10, bubbleY + 14);
+
+      y = bubbleY + bubbleH + 12;
+    };
 
     finalConversation.forEach((msg) => {
-      const lines = doc.splitTextToSize(
-        `${msg.type === "interviewer" ? "Interviewer" : "You"} (${msg.timestamp}): ${msg.content}`,
-        180
-      );
-      doc.text(lines, 10, yOffset);
-      yOffset += lines.length * 10; // space for wrapped lines
-      if (yOffset > 280) { // create new page if overflow
-        doc.addPage();
-        yOffset = 10;
-      }
+      const role = msg.type === "interviewer" ? "interviewer" : "candidate";
+      const stamp =
+        typeof msg.timestamp === "string"
+          ? msg.timestamp
+          : new Date(msg.timestamp).toLocaleTimeString();
+      drawMessage(role, stamp, msg.content);
     });
 
-    const pdfBlob = doc.output("blob");
-    const url = URL.createObjectURL(pdfBlob);
-    window.open(url);
+    if (typeof doc.putTotalPages === "function") {
+      doc.putTotalPages(TOTAL_PLACEHOLDER);
+    }
+
+    const dateSlug = new Date().toISOString().slice(0, 10);
+    doc.save(`Interview_Transcript_${dateSlug}.pdf`);
   };
 
   const hasPlan = questions.length > 0;
