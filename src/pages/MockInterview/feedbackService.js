@@ -1,4 +1,5 @@
 import { OPENROUTER_CONFIG, validateConfig } from "./config.js";
+import masterPrompt from './model_prompt.txt?raw';
 
 export async function generateFeedback(
   answer,
@@ -29,7 +30,7 @@ export async function generateFeedback(
         body: JSON.stringify({
           model: OPENROUTER_CONFIG.model,
           messages: [
-            { role: "system", content: "You are an expert interview coach." },
+            { role: "system", content: masterPrompt },
             { role: "user", content: prompt },
           ],
           temperature: 0.7,
@@ -65,7 +66,7 @@ export async function generateFeedback(
 }
 
 function createFeedbackPrompt(answer, question, company, improvementAreas) {
-  return `You are an interview coach. Provide clear, constructive feedback on the answer below.
+  return `Provide clear, constructive feedback on the answer below.
 
 QUESTION: ${question}
 COMPANY: ${company}
@@ -105,7 +106,7 @@ function generateFallbackFeedback(answer, question, company, improvementAreas) {
   }
   if (!improvementAreas.includes("Answer structure (STAR method)")) {
     tips.push(
-      "Explain the situation, the goal, what you did, and the result in that order."
+      "Explain the (S)ituation, the (T)ask, your (A)ction/s, and the (R)estults you achieved, in that order. This follows the STAR method"
     );
   }
   if (company && company !== "General") {
