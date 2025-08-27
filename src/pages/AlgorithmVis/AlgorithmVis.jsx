@@ -252,20 +252,7 @@ export default function AlgorithmVis() {
         <div className="resize-handle" onMouseDown={handleMouseDown} />
         <div className="right-side" style={{ width: `${100 - leftWidth}%` }}>
           {/* Add example selector */}
-          <div className="example-selector">
-            <select
-              value={selectedExample}
-              onChange={(e) => setSelectedExample(e.target.value)}
-              className="example-dropdown"
-            >
-              {Object.keys(currentExamples).map((exampleKey) => (
-                <option key={exampleKey} value={exampleKey}>
-                  {currentExamples[exampleKey].name}
-                </option>
-              ))}
-            </select>
-          </div>
-
+          
           <CustomPathGraph
             graphOrdering={graphOrdering}
             runGraph={runGraph}

@@ -866,7 +866,7 @@ export default function CustomPathGraph({
           <hr />
           <div className="layout-section">
             <div className="layout-section-title">Layouts:</div>
-            <button className="layout-button" onClick={() => applyLayout('cose')}>Force-Directed</button>
+            <button className="layout-button" onClick={() => applyLayout('cose')}>Directed Acyclic Graph</button>
             <button className="layout-button" onClick={() => applyLayout('breadthfirst')}>Tree</button>
             <button className="layout-button" onClick={() => applyLayout('circle')}>Circle</button>
             <button className="layout-button" onClick={() => applyLayout('grid')}>Grid</button>
