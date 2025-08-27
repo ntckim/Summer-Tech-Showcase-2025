@@ -10,7 +10,10 @@ export default function InterviewSession({
   onEndInterview,
   onReset,
 }) {
+  // ------------------ STATE ------------------
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const currentQuestionIndexRef = useRef(0); // Ref to keep universal latest index
+
   const [conversation, setConversation] = useState([]);
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isQuestionDisplayed, setIsQuestionDisplayed] = useState(false);
@@ -19,7 +22,11 @@ export default function InterviewSession({
   const [showCamera, setShowCamera] = useState(false);
 
   const conversationEndRef = useRef(null);
-  const currentQuestion = questions[currentQuestionIndex];
+
+  // ------------------ EFFECTS ------------------
+  useEffect(() => {
+    currentQuestionIndexRef.current = currentQuestionIndex; // Keep ref in sync
+  }, [currentQuestionIndex]);
 
   useEffect(() => {
     if (conversationEndRef.current) {
@@ -27,24 +34,34 @@ export default function InterviewSession({
     }
   }, [conversation]);
 
-  // Display question — defined BEFORE startInterview to avoid TDZ issues
+  // ------------------ HELPERS ------------------
+  const getCurrentQuestion = () => questions[currentQuestionIndexRef.current];
+
   const displayQuestion = useCallback(() => {
-    if (!currentQuestion) return;
+    const question = getCurrentQuestion();
+    if (!question) return;
+
+    console.log(
+      "[Chat UI] Display question index: ",
+      currentQuestionIndexRef.current
+    );
+
     const questionMessage = {
       type: "interviewer",
-      content: `Question ${currentQuestionIndex + 1}: ${
-        currentQuestion.question
+      content: `Question ${currentQuestionIndexRef.current + 1}: ${
+        question.question
       }`,
       timestamp: new Date().toLocaleTimeString(),
-      company: currentQuestion.company,
+      company: question.company,
     };
     setConversation((prev) => [...prev, questionMessage]);
     setIsQuestionDisplayed(true);
     setIsWaitingForAnswer(true);
-  }, [currentQuestion, currentQuestionIndex]);
+  }, [questions]);
 
   const startInterview = useCallback(() => {
     if (!questions?.length) return;
+
     setIsInterviewStarted(true);
     const greeting = {
       type: "interviewer",
@@ -54,10 +71,11 @@ export default function InterviewSession({
       timestamp: new Date().toLocaleTimeString(),
     };
     setConversation([greeting]);
+
     setTimeout(() => {
-      if (currentQuestion) displayQuestion();
+      displayQuestion();
     }, 600);
-  }, [questions, improvementAreas, currentQuestion, displayQuestion]);
+  }, [questions, improvementAreas, displayQuestion]);
 
   const generateFeedbackFromLLM = async (answer, question, areas) => {
     try {
@@ -77,7 +95,13 @@ export default function InterviewSession({
     async (answerText) => {
       if (!answerText.trim()) return;
 
-      // Add user's answer to conversation
+      console.log(
+        "[Transcript / Speech] Answering question index: ",
+        currentQuestionIndexRef.current
+      );
+
+      const question = getCurrentQuestion();
+
       const userMessage = {
         type: "user",
         content: answerText,
@@ -85,24 +109,21 @@ export default function InterviewSession({
       };
       setConversation((prev) => [...prev, userMessage]);
 
-      // Lock UI: waiting for LLM feedback
       setIsWaitingForAnswer(false);
       setIsProcessingAnswer(true);
 
       try {
         const feedbackResponse = await generateFeedbackFromLLM(
           answerText,
-          currentQuestion,
+          question,
           improvementAreas
         );
-
         const feedbackMessage = {
           type: "interviewer",
           content: feedbackResponse,
           timestamp: new Date().toLocaleTimeString(),
           isFeedback: true,
         };
-
         setConversation((prev) => [...prev, feedbackMessage]);
       } catch (e) {
         setConversation((prev) => [
@@ -115,19 +136,25 @@ export default function InterviewSession({
           },
         ]);
       } finally {
-        // Unlock UI after feedback arrives
         setIsProcessingAnswer(false);
       }
     },
-    [currentQuestion, improvementAreas]
+    [improvementAreas, questions]
   );
 
   const nextQuestion = useCallback(() => {
-    // Block navigating while feedback is generating
     if (isProcessingAnswer) return;
 
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
+    console.log(
+      "[Next Question] Current index before increment: ",
+      currentQuestionIndexRef.current
+    );
+
+    if (currentQuestionIndexRef.current < questions.length - 1) {
+      const newIndex = currentQuestionIndexRef.current + 1;
+      setCurrentQuestionIndex(newIndex);
+      currentQuestionIndexRef.current = newIndex;
+
       setIsQuestionDisplayed(false);
       setIsWaitingForAnswer(false);
       setConversation((prev) => [
@@ -138,8 +165,9 @@ export default function InterviewSession({
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
+
       setTimeout(() => {
-        if (questions[currentQuestionIndex + 1]) displayQuestion();
+        displayQuestion();
       }, 300);
     } else {
       setConversation((prev) => [
@@ -147,16 +175,19 @@ export default function InterviewSession({
         {
           type: "interviewer",
           content:
-            "That’s all the questions. Nice work—review the transcript and refine your answers.",
+            "That’s all the questions. Nice work! Review the transcript and refine your answers.",
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
     }
-  }, [isProcessingAnswer, currentQuestionIndex, questions, displayQuestion]);
+  }, [isProcessingAnswer, questions, displayQuestion]);
 
   const endInterview = useCallback(() => {
     onEndInterview?.();
   }, [onEndInterview]);
+
+  // ------------------ RENDER ------------------
+  const currentQuestion = getCurrentQuestion();
 
   return (
     <div
@@ -190,7 +221,7 @@ export default function InterviewSession({
           >
             Mock Interview Session
           </h1>
-          <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: 12 }}>
+          <p style={{ margin: "20px 0 0", color: "#64748b", fontSize: 12 }}>
             {isInterviewStarted
               ? `Question ${Math.min(
                   currentQuestionIndex + 1,
@@ -229,7 +260,7 @@ export default function InterviewSession({
         </div>
       </div>
 
-      {/* Stream (free-flow lines) */}
+      {/* Stream (chat bubbles) */}
       <div style={{ flex: 1, display: "flex", position: "relative" }}>
         <div
           style={{
@@ -308,7 +339,7 @@ export default function InterviewSession({
         )}
       </div>
 
-      {/* Sticky controls / question + speech + loader */}
+      {/* Sticky controls */}
       <div
         style={{
           position: "sticky",
@@ -320,6 +351,7 @@ export default function InterviewSession({
           display: "flex",
           alignItems: "flex-start",
           gap: 16,
+          marginBottom: "20px",
         }}
       >
         <div style={{ flex: 1, minWidth: 200 }}>
@@ -382,7 +414,11 @@ export default function InterviewSession({
 
         <div style={{ display: "grid", gap: 8 }}>
           <button
-            onClick={() => setCurrentQuestionIndex((v) => Math.max(0, v - 1))}
+            onClick={() => {
+              const newIndex = Math.max(0, currentQuestionIndexRef.current - 1);
+              setCurrentQuestionIndex(newIndex);
+              currentQuestionIndexRef.current = newIndex;
+            }}
             disabled={currentQuestionIndex === 0 || isProcessingAnswer}
             style={{
               padding: "10px 12px",

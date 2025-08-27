@@ -87,13 +87,12 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
   }, [disabled]);
 
   const stopRecording = useCallback(() => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && isRecording) {
       shouldRestartRef.current = false;
-      try {
-        recognitionRef.current.stop();
-      } catch {}
+      recognitionRef.current.stop();
+      setIsRecording(false);
     }
-  }, []);
+  }, [isRecording]);
 
   const submitAnswer = useCallback(() => {
     const finalText = (finalTranscriptRef.current || transcript).trim();
@@ -109,21 +108,6 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
     finalTranscriptRef.current = "";
   }, []);
 
-  useEffect(() => {
-    if (isListening && !isRecording && isSupported && !disabled) {
-      startRecording();
-    }
-    if (!isListening && isRecording) {
-      stopRecording();
-    }
-  }, [
-    isListening,
-    isRecording,
-    isSupported,
-    disabled,
-    startRecording,
-    stopRecording,
-  ]);
 
   if (!isSupported) {
     return (
