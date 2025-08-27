@@ -1,5 +1,5 @@
 import { OPENROUTER_CONFIG, validateConfig } from "./config.js";
-import masterPrompt from './model_prompt.txt?raw';
+import masterPrompt from "./model_prompt.txt?raw";
 
 export async function generateFeedback(
   answer,
@@ -94,11 +94,6 @@ function generateFallbackFeedback(answer, question, company, improvementAreas) {
     "Good start. With clearer structure and one concrete example, your answer will land more strongly."
   );
 
-  if (answer.length < 100) {
-    tips.push(
-      "Add a little more context and include one specific moment so the listener can follow your reasoning."
-    );
-  }
   if (!/\bI\b|\bmy\b/i.test(answer)) {
     tips.push(
       "Use first-person language to highlight your own actions and decisions."
