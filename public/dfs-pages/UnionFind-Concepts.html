@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Union-Find Data Structure</title>
+    <link rel="stylesheet" href="shared-styles.css">
+</head>
+<body>
+    <h1>Union-Find Data Structure</h1>
+    
+    <div class="section">
+        <h2>Problem Description</h2>
+        <p>
+            Efficiently track and merge disjoint sets of elements. Also known as Disjoint Set Union (DSU),
+            it supports two main operations: finding which set an element belongs to and uniting two sets.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>How Union-Find Works</h2>
+        <p>
+            Union-Find maintains a forest of trees where each tree represents a set. It uses path compression
+            during find operations and union by rank/size to keep trees balanced, achieving near-constant time complexity.
+        </p>
+    </div>
+
+    <div class="section algorithm-steps">
+        <h3>Key Operations:</h3>
+        <ol>
+            <li><strong>Find:</strong> Determine which set an element belongs to</li>
+            <li><strong>Union:</strong> Merge two sets into one</li>
+            <li><strong>Path Compression:</strong> Flatten tree during find operations</li>
+            <li><strong>Union by Rank:</strong> Attach smaller tree under larger tree</li>
+        </ol>
+    </div>
+
+    <div class="section key-points">
+        <h2>Key Characteristics</h2>
+        <ul>
+            <li><strong>Disjoint sets:</strong> Manages separate, non-overlapping groups</li>
+            <li><strong>Path compression:</strong> Optimizes find operations</li>
+            <li><strong>Union by rank:</strong> Keeps trees balanced</li>
+            <li><strong>Nearly constant time:</strong> Amortized O(α(n)) per operation</li>
+        </ul>
+    </div>
+
+    <div class="section applications">
+        <h2>Common Applications</h2>
+        <ul>
+            <li>Kruskal's algorithm for Minimum Spanning Tree</li>
+            <li>Connected components in graphs</li>
+            <li>Image processing and segmentation</li>
+            <li>Network connectivity problems</li>
+            <li>Least common ancestor problems</li>
+        </ul>
+    </div>
+
+    <div class="section complexity-table">
+        <h2>Time & Space Complexity</h2>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(α(n)) amortized per operation</li>
+            <li><strong>Space Complexity:</strong> O(n) for parent and rank arrays</li>
+        </ul>
+    </div>
+</body>
+</html>

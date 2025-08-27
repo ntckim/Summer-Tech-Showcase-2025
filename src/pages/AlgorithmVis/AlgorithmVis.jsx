@@ -21,7 +21,7 @@ export default function AlgorithmVis() {
   const [selectedExample, setSelectedExample] = useState("simple");
 
   const concepts = [
-    { id: "bigO", name: "Big O Notation", file: "bigO-notation-concepts.html" },
+    { id: "bigO", name: "Asymptotic Notation", file: "bigO-notation-concepts.html" },
     { id: "dfs", name: "Depth-First Search (DFS)", file: "dfs-concepts.html" },
     {
       id: "bfs",

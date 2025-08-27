@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Spanning Tree</title>
+    <link rel="stylesheet" href="shared-styles.css">
+</head>
+<body>
+    <h1>Minimum Spanning Tree (MST)</h1>
+    
+    <div class="section">
+        <h2>Problem Description</h2>
+        <p>
+            Find a subset of edges in a connected, undirected graph that connects all vertices with 
+            the minimum total edge weight and forms a tree (no cycles).
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>How MST Works</h2>
+        <p>
+            A Minimum Spanning Tree connects all vertices in a graph using the smallest possible total edge weight.
+            It contains exactly V-1 edges for V vertices and has no cycles.
+        </p>
+    </div>
+
+    <div class="section key-points">
+        <h2>Key Characteristics</h2>
+        <ul>
+            <li><strong>Connects all vertices:</strong> Every vertex is reachable from every other vertex</li>
+            <li><strong>Minimum weight:</strong> Has the smallest possible total edge weight</li>
+            <li><strong>No cycles:</strong> Forms a tree structure with V-1 edges</li>
+            <li><strong>Unique (usually):</strong> MST is unique if all edge weights are distinct</li>
+        </ul>
+    </div>
+
+    <div class="section applications">
+        <h2>Common Applications</h2>
+        <ul>
+            <li>Network design (telecommunications, transportation)</li>
+            <li>Circuit design and electrical networks</li>
+            <li>Cluster analysis in machine learning</li>
+            <li>Approximation algorithms for traveling salesman</li>
+            <li>Image segmentation and computer vision</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Algorithms</h2>
+        <p>
+            Two main algorithms for finding MST:
+        </p>
+        <ul>
+            <li><strong>Kruskal's Algorithm:</strong> Edge-based, uses Union-Find</li>
+            <li><strong>Prim's Algorithm:</strong> Vertex-based, uses priority queue</li>
+        </ul>
+    </div>
+</body>
+</html>
