@@ -122,7 +122,13 @@ export default function InterviewForm({ onSubmit }) {
   }, [open]);
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "block" }}>
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        display: "block",
+        color: "var(--text)",
+      }}
+    >
       {/* Resume Upload */}
       <div style={{ marginBottom: "24px" }}>
         <label
@@ -130,7 +136,7 @@ export default function InterviewForm({ onSubmit }) {
             display: "block",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#374151",
+            color: "var(--text)",
             marginBottom: "8px",
           }}
         >
@@ -144,10 +150,12 @@ export default function InterviewForm({ onSubmit }) {
             display: "block",
             width: "100%",
             borderRadius: "12px",
-            border: `1px solid ${hasResumeError ? "#f87171" : "#d1d5db"}`,
+            border: `1px solid ${hasResumeError ? "#f87171" : "var(--border)"}`,
             padding: "8px 12px",
             fontSize: "14px",
             outline: "none",
+            background: "var(--input-bg)",
+            color: "var(--input-text)",
           }}
         />
         {resume && (
@@ -169,7 +177,7 @@ export default function InterviewForm({ onSubmit }) {
             display: "block",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#374151",
+            color: "var(--text)",
             marginBottom: "8px",
           }}
         >
@@ -185,11 +193,12 @@ export default function InterviewForm({ onSubmit }) {
             style={{
               width: "100%",
               borderRadius: "12px",
-              border: `1px solid ${hasCompanyError ? "#f87171" : "#d1d5db"}`,
+              border: `1px solid ${hasCompanyError ? "#f87171" : "var(--border)"}`,
               padding: "8px 12px",
               fontSize: "14px",
               textAlign: "left",
-              background: "#ffffff",
+              background: "var(--input-bg)",
+              color: "var(--input-text)",
               cursor: "pointer",
             }}
           >
@@ -208,8 +217,9 @@ export default function InterviewForm({ onSubmit }) {
                       display: "inline-flex",
                       alignItems: "center",
                       borderRadius: "999px",
-                      border: "1px solid #d1d5db",
-                      background: "#f9fafb",
+                      border: `1px solid var(--border)`,
+                      background: "var(--muted-bg)",
+                      color: "var(--text)",
                       padding: "2px 8px",
                       fontSize: "12px",
                     }}
@@ -219,7 +229,9 @@ export default function InterviewForm({ onSubmit }) {
                 ))}
               </div>
             ) : (
-              <span style={{ color: "#6b7280" }}>Select companies…</span>
+              <span style={{ color: "var(--muted-text)" }}>
+                Select companies…
+              </span>
             )}
           </button>
 
@@ -235,8 +247,8 @@ export default function InterviewForm({ onSubmit }) {
                 maxHeight: "256px",
                 overflowY: "auto",
                 borderRadius: "12px",
-                border: "1px solid #e5e7eb",
-                background: "#ffffff",
+                border: "1px solid var(--border)",
+                background: "var(--input-bg)",
                 padding: "4px",
                 boxShadow:
                   "0 10px 15px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.05)",
@@ -255,7 +267,10 @@ export default function InterviewForm({ onSubmit }) {
                       borderRadius: "10px",
                       padding: "8px 12px",
                       fontSize: "14px",
-                      background: selected ? "#dbeafe" : "transparent",
+                      background: selected
+                        ? "rgba(96, 165, 250, 0.2)" // brand tint
+                        : "transparent",
+                      color: "var(--text)",
                       userSelect: "none",
                     }}
                   >
@@ -268,10 +283,10 @@ export default function InterviewForm({ onSubmit }) {
                 style={{
                   position: "sticky",
                   bottom: 0,
-                  background: "#ffffff",
+                  background: "var(--input-bg)",
                   paddingTop: "6px",
                   marginTop: "6px",
-                  borderTop: "1px solid #e5e7eb",
+                  borderTop: "1px solid var(--border)",
                   display: "flex",
                   gap: "8px",
                   justifyContent: "flex-end",
@@ -282,8 +297,9 @@ export default function InterviewForm({ onSubmit }) {
                   onClick={() => setOpen(false)}
                   style={{
                     borderRadius: "10px",
-                    border: "1px solid #d1d5db",
-                    background: "#f9fafb",
+                    border: "1px solid var(--border)",
+                    background: "var(--muted-bg)",
+                    color: "var(--text)",
                     padding: "8px 12px",
                     fontSize: "14px",
                     cursor: "pointer",
@@ -310,7 +326,7 @@ export default function InterviewForm({ onSubmit }) {
             display: "block",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#374151",
+            color: "var(--text)",
             marginBottom: "8px",
           }}
         >
@@ -334,8 +350,11 @@ export default function InterviewForm({ onSubmit }) {
                   alignItems: "center",
                   gap: "8px",
                   borderRadius: "12px",
-                  border: `1px solid ${checked ? "#93c5fd" : "#e5e7eb"}`,
-                  background: checked ? "#eff6ff" : "#ffffff",
+                  border: `1px solid ${
+                    checked ? "var(--brand-color)" : "var(--border)"
+                  }`,
+                  background: checked ? "rgba(96, 165, 250, 0.15)" : "var(--input-bg)",
+                  color: "var(--text)",
                   padding: "8px 12px",
                   fontSize: "14px",
                   cursor: "pointer",
@@ -345,7 +364,11 @@ export default function InterviewForm({ onSubmit }) {
                   type="checkbox"
                   checked={checked}
                   onChange={() => handleAreaChange(area)}
-                  style={{ width: "16px", height: "16px" }}
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    accentColor: "var(--brand-color)",
+                  }}
                 />
                 <span>{area}</span>
               </label>
@@ -361,7 +384,7 @@ export default function InterviewForm({ onSubmit }) {
             display: "block",
             fontSize: "14px",
             fontWeight: 500,
-            color: "#374151",
+            color: "var(--text)",
             marginBottom: "8px",
           }}
         >
@@ -375,10 +398,12 @@ export default function InterviewForm({ onSubmit }) {
             width: "100%",
             minHeight: "112px",
             borderRadius: "12px",
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--border)",
             padding: "8px 12px",
             fontSize: "14px",
             outline: "none",
+            background: "var(--input-bg)",
+            color: "var(--input-text)",
           }}
         />
       </div>
