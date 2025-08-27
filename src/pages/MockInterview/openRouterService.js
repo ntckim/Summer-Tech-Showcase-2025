@@ -1,7 +1,7 @@
 import { OPENROUTER_CONFIG, validateConfig } from "./config.js";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import masterPrompt from "./model_prompt.txt?raw";
+import masterPrompt from './model_prompt.txt?raw';
 
 // Tell pdfjs where the worker is
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
@@ -13,61 +13,64 @@ export async function generateInterviewQuestions(formData) {
 
     // Read the resume file content
     let resumeText = "";
-    if (formData?.resume) {
-      resumeText = await readResumeFile(formData.resume);
+    if (formData.resume) {
+      resumeText = await readResumeFile(formData.resume); 
     }
 
     // Create a comprehensive prompt for the AI model
     const prompt = createPrompt(formData, resumeText);
 
     // Make HTTP request to OpenRouter
-    const response = await fetch(
-      `${OPENROUTER_CONFIG.baseUrl}/chat/completions`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_CONFIG.apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "Mock Interview App",
-        },
-        body: JSON.stringify({
-          model: OPENROUTER_CONFIG.model,
-          messages: [
-            { role: "system", content: masterPrompt },
-            { role: "user", content: prompt },
-          ],
-          temperature: OPENROUTER_CONFIG.temperature,
-          max_tokens: OPENROUTER_CONFIG.maxTokens,
-        }),
-      }
-    );
+    const response = await fetch(`${OPENROUTER_CONFIG.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_CONFIG.apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Mock Interview App'
+      },
+      body: JSON.stringify({
+        model: OPENROUTER_CONFIG.model,
+        messages: [
+          {
+            role: "system",
+            content: masterPrompt
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: OPENROUTER_CONFIG.temperature,
+        max_tokens: OPENROUTER_CONFIG.maxTokens
+      })
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
-        `OpenRouter API error: ${response.status} ${response.statusText}. ${
-          errorData.error?.message || ""
-        }`
+        `OpenRouter API error: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`
       );
     }
 
     const data = await response.json();
     const aiResponse = data.choices?.[0]?.message?.content;
+
     if (!aiResponse) {
-      throw new Error("No response content received from OpenRouter");
+      throw new Error('No response content received from OpenRouter');
     }
 
     // Parse the response to extract questions
     return parseQuestionsFromResponse(aiResponse);
   } catch (error) {
     console.error("Error generating questions:", error);
-    if (error?.message?.includes("API key")) {
+    if (error.message.includes("API key")) {
       throw new Error(
-        "OpenRouter API key not configured. Please create a .env file in the root directory with:\nVITE_OPENROUTER_API_KEY=your_actual_openrouter_api_key_here"
+        "OpenRouter API key not configured. Please create a .env file in the root directory with:\n" +
+        "VITE_OPENROUTER_API_KEY=your_actual_openrouter_api_key_here"
       );
     }
-    if (error?.message?.includes("OpenRouter API error")) {
+    if (error.message.includes("OpenRouter API error")) {
       throw new Error(
         `API Error: ${error.message}. Please check your API key and try again.`
       );
@@ -78,14 +81,11 @@ export async function generateInterviewQuestions(formData) {
   }
 }
 
-function createPrompt(formData, resumeText) {
-  const {
-    companies = [],
-    improvementAreas = [],
-    notes = "",
-  } = formData || {};
 
-  const prompt = `Generate 10 interview questions for a interviewee based on the following information:
+function createPrompt(formData, resumeText) {
+  const { companies, improvementAreas, notes } = formData;
+
+  let prompt = `Generate 10 interview questions for a interviewee based on the following information:
 
 RESUME CONTENT:
 ${resumeText}
@@ -119,43 +119,40 @@ Do not provide any other output besides the 10 questions`;
 }
 
 function process_resume(text) {
+    console.log("process_resume - raw text: ", text)
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    let firstLineRedacted = false;
+    let processedText = '';
 
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  let firstLineRedacted = false;
-  let processedText = "";
-  const sectionHeaderRegex = /^([A-Z ]{2,})\s*[_-]*$/;
+    const sectionHeaderRegex = /^([A-Z ]{2,})\s*[_-]*$/;
+    const emailRegex = /\b(?:[A-Z0-9._%+-]\s*)+@(?:[A-Z0-9.-]\s*)+\.[A-Z]{2,}\b/gi;
+    const phoneRegex = /\(?\s*\d\s*\d\s*\d\s*\)?[\s.-]*\d\s*\d\s*\d[\s.-]*\d\s*\d\s*\d\s*\d/g;
+    const linkedinRegex = /https?:\/\/(?:www\.)?linkedin\.com\/(?:[A-Z0-9_-]\s*)+\/?/gi;
+    const githubRegex = /https?:\/\/(?:www\.)?github\.com\/(?:[A-Z0-9_-]\s*)+\/?/gi;
 
-  const emailRegex =
-    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
-  const phoneRegex = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/g;
-  const linkedinRegex =
-    /https?:\/\/(www\.)?linkedin\.com\/[A-Za-z0-9/_-]+\/?/gi;
-  const githubRegex =
-    /https?:\/\/(www\.)?github\.com\/[A-Za-z0-9/_-]+\/?/gi;
+    for (let line of lines) {
+        if (!firstLineRedacted) {
+            line = '[REDACTED NAME]';
+            firstLineRedacted = true;
+        } else {
+            line = line
+                .replace(emailRegex, '[REDACTED EMAIL]')
+                .replace(phoneRegex, '[REDACTED PHONE]')
+                .replace(linkedinRegex, '[REDACTED LINKEDIN]')
+                .replace(githubRegex, '[REDACTED GITHUB]');
+        }
 
-  for (let line of lines) {
-    if (!firstLineRedacted) {
-      line = "[REDACTED NAME]";
-      firstLineRedacted = true;
-    } else {
-      line = line
-        .replace(emailRegex, "[REDACTED EMAIL]")
-        .replace(phoneRegex, "[REDACTED PHONE]")
-        .replace(linkedinRegex, "[REDACTED LINKEDIN]")
-        .replace(githubRegex, "[REDACTED GITHUB]");
+        const match = line.match(sectionHeaderRegex);
+        if (match) {
+            const section = match[1].trim();
+            processedText += `\n--- SECTION: ${section} ---\n`;
+        } else {
+            processedText += line + ' ';
+        }
     }
 
-    const match = line.match(sectionHeaderRegex);
-    if (match) {
-      const section = match[1].trim();
-      processedText += `\n--- SECTION: ${section} ---\n`;
-    } else {
-      processedText += line + " ";
-    }
-  }
-
-
-  return processedText;
+    console.log("process_resume - parsed text: ", processedText)
+    return processedText;
 }
 
 export async function readResumeFile(file) {
@@ -173,32 +170,33 @@ export async function readResumeFile(file) {
         let line = "";
 
         content.items.forEach((item) => {
-          const y = item.transform?.[5];
-          const str = item.str ?? "";
-          if (currentY === null) currentY = y;
+          const y = item.transform[5]; // vertical position
+          if (currentY === null) {
+            currentY = y;
+          }
 
-          if (typeof y === "number" && Math.abs(y - currentY) > 1) {
+          if (Math.abs(y - currentY) > 1) {
             // new line detected
             text += line.trim() + "\n";
-            line = str + " ";
+            line = item.str + " ";
             currentY = y;
           } else {
-            line += str + " ";
+            line += item.str + " ";
           }
         });
 
-        if (line) text += line.trim() + "\n";
+        if (line) {
+          text += line.trim() + "\n";
+        }
       }
 
+
       return process_resume(text);
-    } else if (
-      file.type === "text/plain" ||
-      file.type === "text/markdown"
-    ) {
+
+    } else if (file.type === "text/plain" || file.type === "text/markdown") {
       return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = () =>
-          resolve(process_resume(String(reader.result || "")));
+        reader.onload = () => resolve(process_resume(reader.result));
         reader.onerror = () => resolve("");
         reader.readAsText(file);
       });
@@ -217,34 +215,39 @@ function parseQuestionsFromResponse(response) {
   let buffer = "";
 
   rawLines.forEach((line) => {
-    // Detect new question by checking either [Company] or *[Company]*
-    if (line.match(/^\d+\.\s*(\\)?\[[^\]]+\](\\)?/)) {
-      if (buffer) questions.push(parseSingleQuestion(buffer));
+    // Detect new question by checking either [Company] or **[Company]**
+    if (line.match(/^\d+\.\s*(\*\*)?\[[^\]]+\](\*\*)?/)) {
+      if (buffer) {
+        questions.push(parseSingleQuestion(buffer));
+      }
       buffer = line.trim();
     } else if (line.trim()) {
       buffer += " " + line.trim();
     }
   });
 
-  if (buffer) questions.push(parseSingleQuestion(buffer));
+  if (buffer) {
+    questions.push(parseSingleQuestion(buffer));
+  }
 
   return questions;
 }
 
 function parseSingleQuestion(text) {
-  // Match both *[Company]* and [Company]
-  const match = text.match(/^\d+\.\s*(?:\\)?\[([^\]]+)\](?:\\)?\s*(.+)/);
+  // Match both **[Company]** and [Company]
+  const match = text.match(/^\d+\.\s*(?:\*\*)?\[([^\]]+)\](?:\*\*)?\s*(.+)/);
   if (match) {
     return {
       company: match[1].trim(),
       question: match[2].trim(),
-      fullText: text,
+      fullText: text
     };
   } else {
     return {
       company: "General",
       question: text.replace(/^\d+\.\s*/, "").trim(),
-      fullText: text,
+      fullText: text
     };
   }
 }
+

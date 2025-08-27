@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout";
 import InterviewForm from "./InterviewForm";
 import InterviewSession from "./InterviewSession";
 import { generateInterviewQuestions } from "./openRouterService";
+import jsPDF from "jspdf";
 
 export default function MockInterview() {
   const [questions, setQuestions] = useState([]);
@@ -12,7 +13,9 @@ export default function MockInterview() {
   const [showAllQuestions, setShowAllQuestions] = useState(false);
   const [formData, setFormData] = useState(null);
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
+  const [finalConversation, setFinalConversation] = useState([]);
 
+  // ---------------- FORM SUBMIT ----------------
   const handleFormSubmit = useCallback(async (formData) => {
     try {
       setLoading(true);
@@ -21,7 +24,6 @@ export default function MockInterview() {
       setCurrentIdx(0);
       setShowAllQuestions(false);
 
-      // Generate questions using GPT
       const generatedQuestions = await generateInterviewQuestions(formData);
 
       if (
@@ -42,6 +44,7 @@ export default function MockInterview() {
     }
   }, []);
 
+  // ---------------- RESET ----------------
   const handleReset = useCallback(() => {
     setQuestions([]);
     setCurrentIdx(0);
@@ -49,15 +52,43 @@ export default function MockInterview() {
     setShowAllQuestions(false);
     setFormData(null);
     setIsInterviewStarted(false);
+    setFinalConversation([]);
   }, []);
 
-  const handleEndInterview = useCallback(() => {
+  // ---------------- END INTERVIEW ----------------
+  const handleEndInterview = (conversation) => {
+    setFinalConversation(conversation); // store final conversation
     setIsInterviewStarted(false);
-  }, []);
+  };
+
+  // ---------------- PDF TRANSCRIPT ----------------
+  const viewTranscript = () => {
+    if (!finalConversation.length) {
+      return alert("No conversation available yet!");
+    }
+
+    const doc = new jsPDF();
+    let yOffset = 10;
+
+    finalConversation.forEach((msg) => {
+      const lines = doc.splitTextToSize(
+        `${msg.type === "interviewer" ? "Interviewer" : "You"} (${msg.timestamp}): ${msg.content}`,
+        180
+      );
+      doc.text(lines, 10, yOffset);
+      yOffset += lines.length * 10; // space for wrapped lines
+      if (yOffset > 280) { // create new page if overflow
+        doc.addPage();
+        yOffset = 10;
+      }
+    });
+
+    const pdfBlob = doc.output("blob");
+    const url = URL.createObjectURL(pdfBlob);
+    window.open(url);
+  };
 
   const hasPlan = questions.length > 0;
-  const currentQ = hasPlan ? questions[currentIdx] : null;
-  const progress = hasPlan ? ((currentIdx + 1) / questions.length) * 100 : 0;
 
   return (
     <Layout title="Mock Interview – Summer Tech Showcase">
@@ -91,7 +122,6 @@ export default function MockInterview() {
           {!hasPlan && (
             <>
               <InterviewForm onSubmit={handleFormSubmit} />
-
               {loading && (
                 <div style={{ marginTop: "16px", textAlign: "center" }}>
                   <div
@@ -125,7 +155,7 @@ export default function MockInterview() {
                   style={{
                     marginTop: "12px",
                     padding: "12px",
-                    backgroundColor: "rgba(220,38,38,0.12)", // subtle red tint in both themes
+                    backgroundColor: "rgba(220,38,38,0.12)",
                     border: "1px solid #dc2626",
                     borderRadius: "8px",
                   }}
@@ -155,7 +185,7 @@ export default function MockInterview() {
                 border: "1px solid var(--border)",
                 borderRadius: "12px",
                 padding: "16px",
-                background: "var(--bg)", // nested section contrast
+                background: "var(--bg)",
                 color: "var(--text)",
               }}
             >
@@ -204,7 +234,6 @@ export default function MockInterview() {
                 </button>
               </div>
 
-              {/* Reset Button */}
               <div style={{ textAlign: "center", marginTop: "20px" }}>
                 <button
                   type="button"
@@ -224,10 +253,29 @@ export default function MockInterview() {
                   Start New Interview
                 </button>
               </div>
+
+              <div style={{ textAlign: "center", marginTop: "20px" }}>
+                <button
+                  type="button"
+                  onClick={viewTranscript}
+                  style={{
+                    borderRadius: "10px",
+                    border: "1px solid var(--border)",
+                    background: "var(--muted-bg)",
+                    color: "var(--text)",
+                    padding: "10px 20px",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  Transcript PDF
+                </button>
+              </div>
             </div>
           )}
 
-          {/* CSS for loading spinner */}
           <style>{`
             @keyframes spin {
               0% { transform: rotate(0deg); }
