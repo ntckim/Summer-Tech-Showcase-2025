@@ -42,7 +42,9 @@ export default function CodeEditor({
   useEffect(() => {
     if (editorRef.current) {
       const state = EditorState.create({
-        doc: `# DFS Iterative Example (returns edge traversals)
+        doc: `# Algorithm Visualizer - DFS and BFS with step-by-step execution tracking
+from collections import deque
+
 graph = {
     0: [1, 2],
     1: [3, 4],
@@ -54,24 +56,123 @@ graph = {
     7: []
 }
 
-def dfs_iterative_edges(graph, start):
+def dfs_iterative_steps(graph, start):
     visited = set()
     edge_path = []
+    execution_steps = []
     stack = [(start, None)]  # (current_node, parent_node)
+    step = 0
+    
     while stack:
+        step += 1
         current, parent = stack.pop()
+        
+        # Record the step before processing
+        step_info = {
+            'step': step,
+            'action': 'pop',
+            'current_node': current,
+            'parent_node': parent,
+            'stack_before': list(stack),  # Stack state before processing
+            'visited_before': list(visited),
+            'is_visited': current in visited,
+            'algorithm': 'DFS'
+        }
+        
         if current not in visited:
             visited.add(current)
             if parent is not None:
                 edge_path.append(f"{parent}{current}")
-            # Add all unvisited neighbors to stack
+            
+            # Add neighbors to stack (in reverse order for correct DFS)
+            neighbors_added = []
             for neighbor in reversed(graph.get(current, [])):
                 if neighbor not in visited:
                     stack.append((neighbor, current))
-    return edge_path
+                    neighbors_added.append(neighbor)
+            
+            step_info.update({
+                'action': 'visit',
+                'neighbors_added': neighbors_added,
+                'stack_after': list(stack),
+                'visited_after': list(visited),
+                'edge_added': f"{parent}{current}" if parent is not None else None
+            })
+        else:
+            step_info.update({
+                'action': 'skip_visited',
+                'stack_after': list(stack),
+                'visited_after': list(visited)
+            })
+        
+        execution_steps.append(step_info)
+    
+    return {
+        'edge_path': edge_path,
+        'execution_steps': execution_steps,
+        'final_visited': list(visited)
+    }
 
-# Change the starting node below to see different DFS paths!
-dfs_iterative_edges(graph, 0)
+def bfs_iterative_steps(graph, start):
+    visited = set()
+    edge_path = []
+    execution_steps = []
+    queue = deque([(start, None)])  # (current_node, parent_node)
+    step = 0
+    
+    while queue:
+        step += 1
+        current, parent = queue.popleft()
+        
+        # Record the step before processing
+        step_info = {
+            'step': step,
+            'action': 'dequeue',
+            'current_node': current,
+            'parent_node': parent,
+            'queue_before': list(queue),  # Queue state before processing
+            'visited_before': list(visited),
+            'is_visited': current in visited,
+            'algorithm': 'BFS'
+        }
+        
+        if current not in visited:
+            visited.add(current)
+            if parent is not None:
+                edge_path.append(f"{parent}{current}")
+            
+            # Add neighbors to queue (in order for correct BFS)
+            neighbors_added = []
+            for neighbor in graph.get(current, []):
+                if neighbor not in visited:
+                    queue.append((neighbor, current))
+                    neighbors_added.append(neighbor)
+            
+            step_info.update({
+                'action': 'visit',
+                'neighbors_added': neighbors_added,
+                'queue_after': list(queue),
+                'visited_after': list(visited),
+                'edge_added': f"{parent}{current}" if parent is not None else None
+            })
+        else:
+            step_info.update({
+                'action': 'skip_visited',
+                'queue_after': list(queue),
+                'visited_after': list(visited)
+            })
+        
+        execution_steps.append(step_info)
+    
+    return {
+        'edge_path': edge_path,
+        'execution_steps': execution_steps,
+        'final_visited': list(visited)
+    }
+
+# Try either algorithm! Change the starting node to see different paths:
+# dfs_iterative_steps(graph, 0)
+bfs_iterative_steps(graph, 0)
 `,
         extensions: [
           lineNumbers(),
@@ -145,38 +246,99 @@ dfs_iterative_edges(graph, 0)
         const lastLine = lines[lines.length - 1].trim();
         
         // Check if the last line is a function call we can execute
-        if (lastLine && !lastLine.startsWith('#') && lastLine.includes('dfs_iterative_edges')) {
+        if (lastLine && !lastLine.startsWith('#') && (lastLine.includes('dfs_iterative_steps') || lastLine.includes('bfs_iterative_steps'))) {
           console.log("Executing:", lastLine);
           
           // Execute the last line to get the return value
           const result = pyodide.runPython(lastLine);
           const jsResult = result.toJs ? result.toJs() : result;
-          returnValues.dfs = jsResult;
           
-          // Also extract the starting node for the graph visualization
-          const startNodeMatch = lastLine.match(/dfs_iterative_edges\s*\(\s*graph\s*,\s*(\d+)\s*\)/);
-          if (startNodeMatch) {
-            returnValues.startNode = parseInt(startNodeMatch[1]);
+          // Convert the result to a proper JavaScript object
+          let algorithmResult;
+          if (jsResult && typeof jsResult === 'object') {
+            // Convert Python dict to JS object if needed
+            if (jsResult.get) {
+              algorithmResult = {
+                edge_path: jsResult.get('edge_path'),
+                execution_steps: jsResult.get('execution_steps'),
+                final_visited: jsResult.get('final_visited')
+              };
+            } else {
+              algorithmResult = jsResult;
+            }
+          } else {
+            algorithmResult = jsResult;
           }
           
-          console.log("DFS result:", jsResult);
+          returnValues.dfs = algorithmResult; // Keep this key for compatibility
+          
+          // Extract the starting node and algorithm type
+          let startNodeMatch = lastLine.match(/(dfs|bfs)_iterative_steps\s*\(\s*graph\s*,\s*(\d+)\s*\)/);
+          if (startNodeMatch) {
+            returnValues.startNode = parseInt(startNodeMatch[2]);
+            returnValues.algorithmType = startNodeMatch[1].toUpperCase();
+          }
+          
+          console.log("Algorithm result:", algorithmResult);
           console.log("Start node:", returnValues.startNode);
+          console.log("Algorithm type:", returnValues.algorithmType);
           
           capturedOutput += `\nExecuting: ${lastLine}\n`;
-          capturedOutput += `DFS traversal result: ${JSON.stringify(jsResult)}\n`;
+          if (algorithmResult && algorithmResult.execution_steps) {
+            const algoType = returnValues.algorithmType || 'Algorithm';
+            capturedOutput += `${algoType} execution completed: ${algorithmResult.execution_steps.length} steps\n`;
+            capturedOutput += `Edge path: ${JSON.stringify(algorithmResult.edge_path)}\n`;
+            capturedOutput += `Final visited nodes: ${JSON.stringify(algorithmResult.final_visited)}\n`;
+          } else {
+            capturedOutput += `Algorithm traversal result: ${JSON.stringify(algorithmResult)}\n`;
+          }
           if (returnValues.startNode !== undefined) {
             capturedOutput += `Starting from node: ${returnValues.startNode}\n`;
           }
         } else {
           // Fallback to default call if no valid function call found
-          if (pyodide.globals.has('dfs_iterative_edges')) {
-            const result = pyodide.runPython('dfs_iterative_edges(graph, 0)');
-            const jsResult = result.toJs ? result.toJs() : result;
-            returnValues.dfs = jsResult;
-            returnValues.startNode = 0;
+          let fallbackResult = null;
+          let functionName = '';
+          
+          if (pyodide.globals.has('bfs_iterative_steps')) {
+            functionName = 'bfs_iterative_steps';
+            fallbackResult = pyodide.runPython('bfs_iterative_steps(graph, 0)');
+          } else if (pyodide.globals.has('dfs_iterative_steps')) {
+            functionName = 'dfs_iterative_steps';
+            fallbackResult = pyodide.runPython('dfs_iterative_steps(graph, 0)');
+          }
+          
+          if (fallbackResult) {
+            const jsResult = fallbackResult.toJs ? fallbackResult.toJs() : fallbackResult;
             
-            capturedOutput += `\nNo function call found in last line, using default: dfs_iterative_edges(graph, 0)\n`;
-            capturedOutput += `DFS traversal result: ${JSON.stringify(jsResult)}\n`;
+            // Convert the result to a proper JavaScript object
+            let algorithmResult;
+            if (jsResult && typeof jsResult === 'object') {
+              // Convert Python dict to JS object if needed
+              if (jsResult.get) {
+                algorithmResult = {
+                  edge_path: jsResult.get('edge_path'),
+                  execution_steps: jsResult.get('execution_steps'),
+                  final_visited: jsResult.get('final_visited')
+                };
+              } else {
+                algorithmResult = jsResult;
+              }
+            } else {
+              algorithmResult = jsResult;
+            }
+            
+            returnValues.dfs = algorithmResult;
+            returnValues.startNode = 0;
+            returnValues.algorithmType = functionName.includes('bfs') ? 'BFS' : 'DFS';
+            
+            capturedOutput += `\nNo function call found in last line, using default: ${functionName}(graph, 0)\n`;
+            if (algorithmResult && algorithmResult.execution_steps) {
+              capturedOutput += `${returnValues.algorithmType} execution completed: ${algorithmResult.execution_steps.length} steps\n`;
+              capturedOutput += `Edge path: ${JSON.stringify(algorithmResult.edge_path)}\n`;
+            } else {
+              capturedOutput += `${returnValues.algorithmType} traversal result: ${JSON.stringify(algorithmResult)}\n`;
+            }
           }
         }
       } catch (funcError) {

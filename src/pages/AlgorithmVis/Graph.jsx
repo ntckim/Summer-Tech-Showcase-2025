@@ -89,6 +89,47 @@ export default function CustomPathGraph({
         'border-color': '#ff9800',
       },
     },
+    {
+      selector: '.current-node',
+      style: {
+        'background-color': '#ff4444',
+        'border-width': 4,
+        'border-color': '#cc0000',
+        'z-index': 10,
+        'transition-property': 'background-color, border-color',
+        'transition-duration': '0.3s',
+      },
+    },
+    {
+      selector: '.stack-node',
+      style: {
+        'background-color': '#ffaa44',
+        'border-width': 3,
+        'border-color': '#ff8800',
+        'transition-property': 'background-color, border-color',
+        'transition-duration': '0.3s',
+      },
+    },
+    {
+      selector: '.queue-node',
+      style: {
+        'background-color': '#44aaff',
+        'border-width': 3,
+        'border-color': '#0088ff',
+        'transition-property': 'background-color, border-color',
+        'transition-duration': '0.3s',
+      },
+    },
+    {
+      selector: '.visited',
+      style: {
+        'background-color': '#44aa44',
+        'border-width': 2,
+        'border-color': '#228822',
+        'transition-property': 'background-color, border-color',
+        'transition-duration': '0.3s',
+      },
+    },
   ];
 
   // --- Node/edge selection logic ---
@@ -429,16 +470,36 @@ export default function CustomPathGraph({
     URL.revokeObjectURL(url);
   };
 
-  // --- Animation logic (unchanged) ---
+  // --- Enhanced Animation logic for step-by-step execution ---
+  const [executionSteps, setExecutionSteps] = useState([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
   useEffect(() => {
     console.log("Graph ordering changed:", graphOrdering);
-    if (graphOrdering && graphOrdering.output) {
-      console.log("Setting new path from code:", graphOrdering.output.dfs);
-      setPathNodeIds(graphOrdering.output.dfs);
-      setIsUsingDefaultPath(false); // Set to false when a custom path is provided
+    if (graphOrdering && graphOrdering.output && graphOrdering.output.dfs) {
+      const dfsData = graphOrdering.output.dfs;
+      console.log("Setting new execution data from code:", dfsData);
+      
+      if (dfsData.execution_steps) {
+        // Use step-by-step execution data
+        setExecutionSteps(dfsData.execution_steps);
+        setCurrentStepIndex(0);
+        setIsUsingDefaultPath(false); // Set to false when a custom path is provided
+        console.log(`Loaded ${dfsData.execution_steps.length} execution steps`);
+      } else if (dfsData.edge_path) {
+        // Fallback to edge path if execution steps not available
+        setPathNodeIds(dfsData.edge_path);
+        setExecutionSteps([]);
+        setIsUsingDefaultPath(false);
+      } else if (Array.isArray(dfsData)) {
+        // Fallback to legacy edge array format
+        setPathNodeIds(dfsData);
+        setExecutionSteps([]);
+        setIsUsingDefaultPath(false);
+      }
     } else {
       // If no custom path, ensure default path is loaded
-      if (pathNodeIds.length === 0) {
+      if (pathNodeIds.length === 0 && executionSteps.length === 0) {
         const defaultPath = getDefaultPath(selectedConcept, selectedExample);
         if (defaultPath.length > 0) {
           setPathNodeIds(defaultPath);
@@ -555,9 +616,104 @@ export default function CustomPathGraph({
     }
   }, [runGraph]);
 
-  // Smart animation system that understands algorithm backtracking
+  // Step-by-step animation based on execution steps from code
+  const startStepByStepAnimation = (totalTime = 5000) => {
+    if (isRunning || executionSteps.length === 0) return;
+    setIsRunning(true);
+    setCurrentStepIndex(0);
+    
+    const cy = cyRef.current;
+    if (!cy) {
+      setIsRunning(false);
+      return;
+    }
+    
+    console.log(`Starting step-by-step animation with ${executionSteps.length} steps over ${totalTime}ms`);
+    
+    // Clear any existing highlighting
+    cy.elements().removeClass('highlighted visited current-node stack-node queue-node');
+    
+    const stepDuration = totalTime / executionSteps.length;
+    
+    const animateStep = (stepIndex) => {
+      if (stepIndex >= executionSteps.length || !isRunning) {
+        console.log('Step-by-step animation completed');
+        setIsRunning(false);
+        return;
+      }
+      
+      const step = executionSteps[stepIndex];
+      setCurrentStepIndex(stepIndex);
+      
+      const algorithmType = step.algorithm || 'DFS';
+      console.log(`Step ${step.step}: ${step.action} node ${step.current_node} (${algorithmType})`, step);
+      
+      // Clear previous step highlighting
+      cy.elements().removeClass('current-node stack-node queue-node');
+      
+      // Highlight visited nodes (persistent)
+      if (step.visited_after) {
+        step.visited_after.forEach(nodeId => {
+          const node = cy.getElementById(nodeId);
+          if (node.length > 0) {
+            node.addClass('visited');
+          }
+        });
+      }
+      
+      // Highlight current node being processed
+      const currentNode = cy.getElementById(step.current_node);
+      if (currentNode.length > 0) {
+        currentNode.addClass('current-node');
+      }
+      
+      // Highlight nodes currently on the stack (DFS) or queue (BFS)
+      if (step.stack_after) {
+        step.stack_after.forEach(stackItem => {
+          const nodeId = Array.isArray(stackItem) ? stackItem[0] : stackItem;
+          const stackNode = cy.getElementById(nodeId);
+          if (stackNode.length > 0) {
+            stackNode.addClass('stack-node');
+          }
+        });
+      } else if (step.queue_after) {
+        step.queue_after.forEach(queueItem => {
+          const nodeId = Array.isArray(queueItem) ? queueItem[0] : queueItem;
+          const queueNode = cy.getElementById(nodeId);
+          if (queueNode.length > 0) {
+            queueNode.addClass('queue-node');
+          }
+        });
+      }
+      
+      // Highlight the edge if one was added
+      if (step.edge_added) {
+        const edge = cy.getElementById(step.edge_added);
+        if (edge.length > 0) {
+          edge.addClass('highlighted');
+        }
+      }
+      
+      // Schedule next step
+      setTimeout(() => animateStep(stepIndex + 1), stepDuration);
+    };
+    
+    // Start the animation
+    animateStep(0);
+  };
+
+  // Enhanced animation system for step-by-step execution
   const startAnimationWithSpeed = (totalTime = 5000) => {
-    if (isRunning || !pathRef.current.length) return;
+    if (isRunning) return;
+    
+    // Check if we have execution steps data
+    if (executionSteps.length > 0) {
+      startStepByStepAnimation(totalTime);
+      return;
+    }
+    
+    // Fallback to edge/path animation for backwards compatibility
+    if (!pathRef.current.length) return;
     setIsRunning(true);
     
     // Check if we're using an edge-based path (much simpler)
@@ -775,8 +931,9 @@ export default function CustomPathGraph({
   const resetAnimation = () => {
     stopAnimation();
     indexRef.current = 0;
+    setCurrentStepIndex(0);
     if (cyRef.current) {
-      cyRef.current.elements().removeClass('highlighted');
+      cyRef.current.elements().removeClass('highlighted visited current-node stack-node queue-node');
     }
   };
 
@@ -800,8 +957,19 @@ export default function CustomPathGraph({
   };
 
   const nextNode = () => {
+    if (isRunning) return;
+    
+    // Use execution steps if available
+    if (executionSteps.length > 0) {
+      if (currentStepIndex >= executionSteps.length) return;
+      executeStep(currentStepIndex);
+      setCurrentStepIndex(currentStepIndex + 1);
+      return;
+    }
+    
+    // Fallback to legacy path animation
     const path = pathRef.current;
-    if (isRunning || indexRef.current >= path.length) return;
+    if (indexRef.current >= path.length) return;
     
     // Highlight the current element (node or edge)
     path[indexRef.current].addClass('highlighted');
@@ -809,12 +977,119 @@ export default function CustomPathGraph({
   };
 
   const previousNode = () => {
-    if (isRunning || indexRef.current - 1 < 0) return;
+    if (isRunning) return;
+    
+    // Use execution steps if available
+    if (executionSteps.length > 0) {
+      if (currentStepIndex <= 0) return;
+      setCurrentStepIndex(currentStepIndex - 1);
+      // Re-execute all steps up to the previous one
+      replayStepsUpTo(currentStepIndex - 1);
+      return;
+    }
+    
+    // Fallback to legacy path animation
+    if (indexRef.current - 1 < 0) return;
     const path = pathRef.current;
     
     // Remove highlight from the previous element
     path[indexRef.current - 1].removeClass('highlighted');
     indexRef.current -= 1;
+  };
+
+  // Execute a single step from the execution steps
+  const executeStep = (stepIndex) => {
+    if (stepIndex >= executionSteps.length) return;
+    
+    const cy = cyRef.current;
+    if (!cy) return;
+    
+    const step = executionSteps[stepIndex];
+    
+    // Clear previous step highlighting
+    cy.elements().removeClass('current-node stack-node queue-node');
+    
+    // Highlight visited nodes (persistent)
+    if (step.visited_after) {
+      step.visited_after.forEach(nodeId => {
+        const node = cy.getElementById(nodeId);
+        if (node.length > 0) {
+          node.addClass('visited');
+        }
+      });
+    }
+    
+    // Highlight current node being processed
+    const currentNode = cy.getElementById(step.current_node);
+    if (currentNode.length > 0) {
+      currentNode.addClass('current-node');
+    }
+    
+    // Highlight nodes currently on the stack (DFS) or queue (BFS)
+    if (step.stack_after) {
+      step.stack_after.forEach(stackItem => {
+        const nodeId = Array.isArray(stackItem) ? stackItem[0] : stackItem;
+        const stackNode = cy.getElementById(nodeId);
+        if (stackNode.length > 0) {
+          stackNode.addClass('stack-node');
+        }
+      });
+    } else if (step.queue_after) {
+      step.queue_after.forEach(queueItem => {
+        const nodeId = Array.isArray(queueItem) ? queueItem[0] : queueItem;
+        const queueNode = cy.getElementById(nodeId);
+        if (queueNode.length > 0) {
+          queueNode.addClass('queue-node');
+        }
+      });
+    }
+    
+    // Highlight the edge if one was added
+    if (step.edge_added) {
+      const edge = cy.getElementById(step.edge_added);
+      if (edge.length > 0) {
+        edge.addClass('highlighted');
+      }
+    }
+  };
+
+  // Replay all steps up to a given index
+  const replayStepsUpTo = (targetIndex) => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    
+    // Clear all highlighting
+    cy.elements().removeClass('highlighted visited current-node stack-node queue-node');
+    
+    // Replay all steps up to target index
+    for (let i = 0; i <= targetIndex; i++) {
+      if (i < executionSteps.length) {
+        const step = executionSteps[i];
+        
+        // Add visited nodes
+        if (step.visited_after) {
+          step.visited_after.forEach(nodeId => {
+            const node = cy.getElementById(nodeId);
+            if (node.length > 0) {
+              node.addClass('visited');
+            }
+          });
+        }
+        
+        // Add highlighted edges
+        if (step.edge_added) {
+          const edge = cy.getElementById(step.edge_added);
+          if (edge.length > 0) {
+            edge.addClass('highlighted');
+          }
+        }
+      }
+    }
+    
+    // Apply the final step's state
+    if (targetIndex >= 0 && targetIndex < executionSteps.length) {
+      executeStep(targetIndex);
+    }
   };
 
   return (
@@ -881,13 +1156,28 @@ export default function CustomPathGraph({
           <button onClick={handleSaveGraph}>Save Graph</button>
           <hr />
           <div className={`path-indicator ${isUsingDefaultPath ? 'default' : 'custom'}`}>
-            {isUsingDefaultPath ? '📖 Default Path' : '⚡ Custom Path'}
+            {executionSteps.length > 0 ? '🔍 Step-by-Step Execution' : (isUsingDefaultPath ? '📖 Default Path' : '⚡ Custom Path')}
             <br />
             <small>
-              {pathNodeIds.length > 0 && typeof pathNodeIds[0] === 'string' && pathNodeIds[0].length === 2 
-                ? `${pathRef.current.length} elements (nodes + edges)` 
-                : `${pathNodeIds.length} nodes`}
+              {executionSteps.length > 0 
+                ? `Step ${currentStepIndex}/${executionSteps.length}` 
+                : (pathNodeIds.length > 0 && typeof pathNodeIds[0] === 'string' && pathNodeIds[0].length === 2 
+                  ? `${pathRef.current.length} elements (nodes + edges)` 
+                  : `${pathNodeIds.length} nodes`)}
             </small>
+            {executionSteps.length > 0 && currentStepIndex > 0 && currentStepIndex <= executionSteps.length && (
+              <div style={{ fontSize: '10px', marginTop: '4px', background: '#f0f0f0', padding: '2px 4px', borderRadius: '2px' }}>
+                <div><strong>Algorithm:</strong> {executionSteps[currentStepIndex - 1]?.algorithm || 'DFS'}</div>
+                <div><strong>Action:</strong> {executionSteps[currentStepIndex - 1]?.action}</div>
+                <div><strong>Node:</strong> {executionSteps[currentStepIndex - 1]?.current_node}</div>
+                {executionSteps[currentStepIndex - 1]?.stack_after && (
+                  <div><strong>Stack:</strong> [{executionSteps[currentStepIndex - 1].stack_after.map(item => Array.isArray(item) ? item[0] : item).join(', ')}]</div>
+                )}
+                {executionSteps[currentStepIndex - 1]?.queue_after && (
+                  <div><strong>Queue:</strong> [{executionSteps[currentStepIndex - 1].queue_after.map(item => Array.isArray(item) ? item[0] : item).join(', ')}]</div>
+                )}
+              </div>
+            )}
           </div>
           <button onClick={() => {
             if (isUsingDefaultPath) {
@@ -907,11 +1197,33 @@ export default function CustomPathGraph({
             {isUsingDefaultPath ? 'Hide Path' : 'Show Default Path'}
           </button>
           <hr />
-          <button onClick={previousNode} disabled={isRunning || indexRef.current === 0}>&larr;</button>
+          {executionSteps.length > 0 && (
+            <div style={{ fontSize: '9px', textAlign: 'left', marginBottom: '6px' }}>
+              <div><strong>Legend:</strong></div>
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: '2px' }}>
+                <div style={{ width: '10px', height: '10px', backgroundColor: '#ff4444', borderRadius: '50%', marginRight: '4px' }}></div>
+                Current Node
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: '2px' }}>
+                <div style={{ width: '10px', height: '10px', backgroundColor: '#44aa44', borderRadius: '50%', marginRight: '4px' }}></div>
+                Visited
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: '2px' }}>
+                <div style={{ width: '10px', height: '10px', backgroundColor: '#ffaa44', borderRadius: '50%', marginRight: '4px' }}></div>
+                Stack (DFS)
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: '2px' }}>
+                <div style={{ width: '10px', height: '10px', backgroundColor: '#44aaff', borderRadius: '50%', marginRight: '4px' }}></div>
+                Queue (BFS)
+              </div>
+            </div>
+          )}
+          <hr />
+          <button onClick={previousNode} disabled={isRunning || (executionSteps.length > 0 ? currentStepIndex === 0 : indexRef.current === 0)}>&larr;</button>
           <button onClick={startAnimation} disabled={isRunning}>▶️ Start</button>
           <button onClick={stopAnimation} disabled={!isRunning}>⏸️ Stop</button>
           <button onClick={resetAnimation}>🔁 Reset</button>
-          <button onClick={nextNode} disabled={isRunning || indexRef.current === pathRef.current.length}>&rarr;</button>
+          <button onClick={nextNode} disabled={isRunning || (executionSteps.length > 0 ? currentStepIndex >= executionSteps.length : indexRef.current === pathRef.current.length)}>&rarr;</button>
           <hr />
           <div style={{ fontSize: '11px', textAlign: 'center', marginBottom: '4px' }}>
             Animation Speed
