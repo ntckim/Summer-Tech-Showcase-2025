@@ -119,7 +119,7 @@ Do not provide any other output besides the 10 questions`;
 }
 
 function process_resume(text) {
-  console.log("process_resume - raw text: ", text);
+
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   let firstLineRedacted = false;
   let processedText = "";
@@ -154,7 +154,7 @@ function process_resume(text) {
     }
   }
 
-  console.log("process_resume - parsed text: ", processedText);
+
   return processedText;
 }
 
