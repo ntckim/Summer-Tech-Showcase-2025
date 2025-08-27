@@ -46,7 +46,7 @@ export default function TypewriterText({
             display: "inline-block",
             width: 2,
             height: "1.2em",
-            backgroundColor: "#2563eb",
+            backgroundColor: "var(--brand-color)", // uses brand color in both themes
             marginLeft: 2,
             animation: cursorBlink ? "blink 1s infinite" : "none",
             verticalAlign: "text-bottom",

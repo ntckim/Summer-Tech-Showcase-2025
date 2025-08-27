@@ -108,7 +108,7 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
     finalTranscriptRef.current = "";
   }, []);
 
-
+  // ---------- UI ----------
   if (!isSupported) {
     return (
       <div style={{ display: "grid", gap: 8 }}>
@@ -120,9 +120,11 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
             width: "100%",
             minHeight: 100,
             padding: 12,
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--border)",
             borderRadius: 8,
             fontSize: 14,
+            background: "var(--bg)",
+            color: "var(--text)",
           }}
         />
         <div style={{ display: "flex", gap: 8 }}>
@@ -132,10 +134,11 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
             style={{
               padding: "10px 12px",
               borderRadius: 8,
-              background: transcript.trim() ? "#2563eb" : "#9ca3af",
+              background: transcript.trim() ? "#2563eb" : "var(--border)",
               color: "#fff",
               border: "none",
               fontWeight: 600,
+              cursor: transcript.trim() ? "pointer" : "not-allowed",
             }}
           >
             Submit
@@ -145,16 +148,18 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
             style={{
               padding: "10px 12px",
               borderRadius: 8,
-              background: "#6b7280",
-              color: "#fff",
-              border: "none",
+              background: "var(--muted-bg)",
+              color: "var(--text)",
+              border: "1px solid var(--border)",
               fontWeight: 600,
             }}
           >
             Clear
           </button>
         </div>
-        {error && <div style={{ color: "#b91c1c", fontSize: 13 }}>{error}</div>}
+        {error && (
+          <div style={{ color: "#b91c1c", fontSize: 13 }}>{error}</div>
+        )}
       </div>
     );
   }
@@ -167,12 +172,15 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
             width: 10,
             height: 10,
             borderRadius: "50%",
-            background: isRecording ? "#ef4444" : "#9ca3af",
+            background: isRecording ? "#ef4444" : "var(--border)",
             animation: isRecording ? "pulse 1.5s infinite" : "none",
           }}
         />
         <span
-          style={{ fontSize: 12, color: isRecording ? "#b91c1c" : "#6b7280" }}
+          style={{
+            fontSize: 12,
+            color: isRecording ? "#b91c1c" : "var(--muted-text)",
+          }}
         >
           {isRecording ? "Listening…" : "Ready"}
         </span>
@@ -185,11 +193,12 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
             style={{
               marginLeft: 8,
               padding: "8px 12px",
-              background: disabled ? "#9ca3af" : "#10b981",
+              background: disabled ? "var(--border)" : "#10b981",
               color: "#fff",
               border: "none",
               borderRadius: 8,
               fontWeight: 600,
+              cursor: disabled ? "not-allowed" : "pointer",
             }}
           >
             Start
@@ -206,6 +215,7 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
               border: "none",
               borderRadius: 8,
               fontWeight: 600,
+              cursor: "pointer",
             }}
           >
             Stop
@@ -218,9 +228,9 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
           style={{
             marginLeft: 8,
             padding: "8px 12px",
-            background: "#6b7280",
-            color: "#fff",
-            border: "none",
+            background: "var(--muted-bg)",
+            color: "var(--text)",
+            border: "1px solid var(--border)",
             borderRadius: 8,
             fontWeight: 600,
           }}
@@ -239,6 +249,7 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
             border: "none",
             borderRadius: 8,
             fontWeight: 700,
+            cursor: "pointer",
           }}
         >
           Submit
@@ -247,19 +258,20 @@ export default function SpeechRecognition({ onAnswer, isListening, disabled }) {
 
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e5e7eb",
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
           borderRadius: 8,
           padding: 12,
           minHeight: 90,
           fontSize: 14,
           lineHeight: 1.5,
+          color: "var(--text)",
         }}
       >
         {transcript ? (
           transcript
         ) : (
-          <span style={{ color: "#9ca3af", fontStyle: "italic" }}>
+          <span style={{ color: "var(--muted-text)", fontStyle: "italic" }}>
             {isRecording ? "Speak now…" : "Click Start to begin speaking"}
           </span>
         )}
