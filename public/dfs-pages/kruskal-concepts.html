@@ -35,6 +35,31 @@
         </ul>
     </div>
 
+    <div class="section">
+        <h2>Pseudocode</h2>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+<strong>Kruskal(graph):</strong>
+    MST = empty set
+    edges = getAllEdges(graph)
+    unionFind = new UnionFind(vertices)
+    
+    // Sort edges by weight in ascending order
+    sort(edges) by weight
+    
+    for each edge (u, v, weight) in edges:
+        // Check if adding this edge creates a cycle
+        if unionFind.find(u) != unionFind.find(v):
+            MST.add(edge(u, v, weight))
+            unionFind.union(u, v)
+            
+            // Stop when we have V-1 edges (complete MST)
+            if MST.size() == |V| - 1:
+                break
+    
+    return MST
+        </pre>
+    </div>
+
     <div class="section complexity-table">
         <h2>Time & Space Complexity</h2>
         <ul>

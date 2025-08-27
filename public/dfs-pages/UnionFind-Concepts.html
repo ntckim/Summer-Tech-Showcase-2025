@@ -56,6 +56,62 @@
         </ul>
     </div>
 
+    <div class="section">
+        <h2>Pseudocode</h2>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+<strong>UnionFind(n):</strong>
+    parent = new Array(n)
+    rank = new Array(n)
+    
+    for i = 0 to n - 1:
+        parent[i] = i    // Each element is its own parent initially
+        rank[i] = 0      // Initial rank is 0
+
+<strong>Find(x):</strong>
+    if parent[x] != x:
+        parent[x] = Find(parent[x])  // Path compression
+    return parent[x]
+
+<strong>Union(x, y):</strong>
+    rootX = Find(x)
+    rootY = Find(y)
+    
+    if rootX != rootY:
+        // Union by rank
+        if rank[rootX] < rank[rootY]:
+            parent[rootX] = rootY
+        else if rank[rootX] > rank[rootY]:
+            parent[rootY] = rootX
+        else:
+            parent[rootY] = rootX
+            rank[rootX]++
+
+<strong>Connected(x, y):</strong>
+    return Find(x) == Find(y)
+
+<strong>UnionFind-WithSize(n):</strong>
+    parent = new Array(n)
+    size = new Array(n)
+    
+    for i = 0 to n - 1:
+        parent[i] = i
+        size[i] = 1
+
+<strong>Union-BySize(x, y):</strong>
+    rootX = Find(x)
+    rootY = Find(y)
+    
+    if rootX != rootY:
+        // Union by size (attach smaller tree under larger tree)
+        if size[rootX] < size[rootY]:
+            parent[rootX] = rootY
+            size[rootY] += size[rootX]
+        else:
+            parent[rootY] = rootX
+            size[rootX] += size[rootY]
+        </pre>
+    </div>
+
     <div class="section complexity-table">
         <h2>Time & Space Complexity</h2>
         <ul>

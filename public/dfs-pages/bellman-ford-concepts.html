@@ -35,6 +35,32 @@
         </ul>
     </div>
 
+    <div class="section">
+        <h2>Pseudocode</h2>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+<strong>BellmanFord(graph, source):</strong>
+    distance = new Array(size of graph)
+    
+    // Initialize distances
+    for each vertex v in graph:
+        distance[v] = INFINITY
+    distance[source] = 0
+    
+    // Relax edges repeatedly
+    for i = 1 to |V| - 1:
+        for each edge (u, v) with weight w in graph:
+            if distance[u] != INFINITY and distance[u] + w < distance[v]:
+                distance[v] = distance[u] + w
+    
+    // Check for negative weight cycles
+    for each edge (u, v) with weight w in graph:
+        if distance[u] != INFINITY and distance[u] + w < distance[v]:
+            return "Graph contains negative weight cycle"
+    
+    return distance
+        </pre>
+    </div>
+
     <div class="section complexity-table">
         <h2>Time & Space Complexity</h2>
         <ul>

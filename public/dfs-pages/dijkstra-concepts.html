@@ -35,6 +35,41 @@
         </ul>
     </div>
 
+    <div class="section">
+        <h2>Pseudocode</h2>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+<strong>Dijkstra(graph, source):</strong>
+    distance = new Array(size of graph)
+    visited = new Set()
+    priorityQueue = new MinHeap()
+    
+    // Initialize distances
+    for each vertex v in graph:
+        distance[v] = INFINITY
+    distance[source] = 0
+    
+    priorityQueue.insert(source, 0)
+    
+    while priorityQueue is not empty:
+        current = priorityQueue.extractMin()
+        
+        if current in visited:
+            continue
+        
+        visited.add(current)
+        
+        for each neighbor of current:
+            weight = graph[current][neighbor]
+            newDistance = distance[current] + weight
+            
+            if newDistance < distance[neighbor]:
+                distance[neighbor] = newDistance
+                priorityQueue.insert(neighbor, newDistance)
+    
+    return distance
+        </pre>
+    </div>
+
     <div class="section complexity-table">
         <h2>Time & Space Complexity</h2>
         <ul>

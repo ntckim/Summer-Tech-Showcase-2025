@@ -35,6 +35,65 @@
         </ul>
     </div>
 
+    <div class="section">
+        <h2>Pseudocode</h2>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+<strong>TopologicalSort-DFS(graph):</strong>
+    visited = new Set()
+    stack = new Stack()
+    
+    for each vertex v in graph:
+        if v not in visited:
+            DFS-TopSort(graph, v, visited, stack)
+    
+    result = empty list
+    while stack is not empty:
+        result.add(stack.pop())
+    
+    return result
+
+<strong>DFS-TopSort(graph, vertex, visited, stack):</strong>
+    visited.add(vertex)
+    
+    for each neighbor in graph[vertex]:
+        if neighbor not in visited:
+            DFS-TopSort(graph, neighbor, visited, stack)
+    
+    stack.push(vertex)  // Add to stack after processing all neighbors
+
+<strong>TopologicalSort-Kahn(graph):</strong>
+    inDegree = new Array(|V|, 0)
+    queue = new Queue()
+    result = empty list
+    
+    // Calculate in-degrees
+    for each vertex u in graph:
+        for each neighbor v in graph[u]:
+            inDegree[v]++
+    
+    // Add vertices with 0 in-degree to queue
+    for each vertex v in graph:
+        if inDegree[v] == 0:
+            queue.enqueue(v)
+    
+    while queue is not empty:
+        vertex = queue.dequeue()
+        result.add(vertex)
+        
+        // Reduce in-degree of neighbors
+        for each neighbor in graph[vertex]:
+            inDegree[neighbor]--
+            if inDegree[neighbor] == 0:
+                queue.enqueue(neighbor)
+    
+    // Check for cycle
+    if result.size() != |V|:
+        return "Graph has cycle - topological sort not possible"
+    
+    return result
+        </pre>
+    </div>
+
     <div class="section complexity-table">
         <h2>Time & Space Complexity</h2>
         <ul>

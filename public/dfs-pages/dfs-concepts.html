@@ -59,6 +59,20 @@
         </ul>
     </div>
 
+    <div class="section">
+        <h2>Pseudocode</h2>
+        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+<strong>DFS-Recursive(graph, vertex, visited):</strong>
+    visited[vertex] = true
+    print vertex
+    
+    for each neighbor in graph[vertex]:
+        if not visited[neighbor]:
+            DFS-Recursive(graph, neighbor, visited)
+
+        </pre>
+    </div>
+
     <div class="section complexity-table">
         <h2>Time & Space Complexity</h2>
         <ul>
