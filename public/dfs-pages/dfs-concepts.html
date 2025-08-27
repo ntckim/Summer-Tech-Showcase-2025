@@ -4,137 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DFS Concepts</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 24px;
-            background-color: #ffffff;
-            color: #2d3748;
-            line-height: 1.6;
-        }
-
-        h1 {
-            color: #1a202c;
-            margin-bottom: 18px;
-            font-size: 24px;
-            font-weight: 700;
-            border-bottom: 2px solid #4299e1;
-            padding-bottom: 8px;
-        }
-
-        h2 {
-            color: #2d3748;
-            margin-top: 16px;
-            margin-bottom: 8px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        h3 {
-            color: #4a5568;
-            margin-top: 16px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        p {
-            margin-bottom: 16px;
-            color: #4a5568;
-            font-size: 12px;
-        }
-
-        ul, ol {
-            margin-left: 20px;
-            margin-bottom: 16px;
-        }
-
-        li {
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 12px;
-        }
-
-        strong {
-            color: #2b6cb0;
-            font-weight: 600;
-        }
-
-        ul li strong {
-            color: #38a169;
-        }
-
-        ol li strong {
-            color: #d69e2e;
-        }
-
-        pre {
-            background-color: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            overflow-x: auto;
-            font-size: 14px;
-            color: #2d3748;
-            margin: 16px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="shared-styles.css">
 </head>
 <body>
     <h1>Depth-First Search (DFS)</h1>
     
-    <h2>Problem Description</h2>
-    <p>
-        Implement a Depth-First Search algorithm to traverse a graph. DFS explores as far as possible 
-        along each branch before backtracking, making it useful for exploring all possible paths in a graph.
-    </p>
+    <div class="section">
+        <h2>Problem Description</h2>
+        <p>
+            Implement a Depth-First Search algorithm to traverse a graph. DFS explores as far as possible 
+            along each branch before backtracking, making it useful for exploring all possible paths in a graph.
+        </p>
+    </div>
 
-    <h2>How DFS Works</h2>
-    <p>
-        Depth-First Search works by starting at a chosen node and exploring as far as possible along each branch 
-        before backtracking. Think of it like exploring a maze - you take one path as far as it goes, then 
-        backtrack to try another path when you hit a dead end.
-    </p>
+    <div class="section">
+        <h2>How DFS Works</h2>
+        <p>
+            Depth-First Search works by starting at a chosen node and exploring as far as possible along each branch 
+            before backtracking. Think of it like exploring a maze - you take one path as far as it goes, then 
+            backtrack to try another path when you hit a dead end.
+        </p>
+    </div>
 
-    <h3>Algorithm Steps:</h3>
-    <ol>
-        <li>Start at a chosen node (root)</li>
-        <li>Mark the current node as visited</li>
-        <li>Explore an unvisited neighbor of the current node</li>
-        <li>Recursively apply the same process to the neighbor</li>
-        <li>When you reach a dead end, backtrack to the previous node</li>
-        <li>Continue until all reachable nodes are visited</li>
-    </ol>
+    <div class="section algorithm-steps">
+        <h3>Algorithm Steps:</h3>
+        <ol>
+            <li>Start at a chosen node (root)</li>
+            <li>Mark the current node as visited</li>
+            <li>Explore an unvisited neighbor of the current node</li>
+            <li>Recursively apply the same process to the neighbor</li>
+            <li>When you reach a dead end, backtrack to the previous node</li>
+            <li>Continue until all reachable nodes are visited</li>
+        </ol>
+    </div>
 
-    <h2>Key Characteristics</h2>
-    <ul>
-        <li><strong>Uses a stack:</strong> Either explicitly (iterative) or implicitly (recursive)</li>
-        <li><strong>Memory efficient:</strong> Only stores the current path in memory</li>
-        <li><strong>Complete traversal:</strong> Visits all reachable nodes from the starting point</li>
-        <li><strong>Order matters:</strong> The order of visiting neighbors affects the traversal path</li>
-    </ul>
+    <div class="section key-points">
+        <h2>Key Characteristics</h2>
+        <ul>
+            <li><strong>Uses a stack:</strong> Either explicitly (iterative) or implicitly (recursive)</li>
+            <li><strong>Memory efficient:</strong> Only stores the current path in memory</li>
+            <li><strong>Complete traversal:</strong> Visits all reachable nodes from the starting point</li>
+            <li><strong>Order matters:</strong> The order of visiting neighbors affects the traversal path</li>
+        </ul>
+    </div>
 
-    <h2>Common Applications</h2>
-    <ul>
-        <li>Maze solving and pathfinding</li>
-        <li>Topological sorting of directed acyclic graphs</li>
-        <li>Cycle detection in directed graphs</li>
-        <li>Finding connected components</li>
-        <li>Game tree exploration and analysis</li>
-    </ul>
+    <div class="section applications">
+        <h2>Common Applications</h2>
+        <ul>
+            <li>Maze solving and pathfinding</li>
+            <li>Topological sorting of directed acyclic graphs</li>
+            <li>Cycle detection in directed graphs</li>
+            <li>Finding connected components</li>
+            <li>Game tree exploration and analysis</li>
+        </ul>
+    </div>
 
-    <h2>Time & Space Complexity</h2>
-    <ul>
-        <li><strong>Time Complexity:</strong> O(V + E) where V = vertices, E = edges</li>
-        <li><strong>Space Complexity:</strong> O(V) in worst case (when graph is a straight line)</li>
-    </ul>
+    <div class="section complexity-table">
+        <h2>Time & Space Complexity</h2>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(V + E) where V = vertices, E = edges</li>
+            <li><strong>Space Complexity:</strong> O(V) in worst case (when graph is a straight line)</li>
+        </ul>
+    </div>
 
-    <h2>Example</h2>
-    <p>
-        Given the graph below, a DFS starting from node 0 would visit nodes in this order: 0 → 1 → 3 → 4 → 7 → 2 → 5 → 6
-    </p>
-    <pre>Graph (Adjacency List):
+    <div class="section">
+        <h2>Example</h2>
+        <p>
+            Given the graph below, a DFS starting from node 0 would visit nodes in this order: 0 → 1 → 3 → 4 → 7 → 2 → 5 → 6
+        </p>
+        <pre>Graph (Adjacency List):
 0: [1, 2]
 1: [0, 3, 4]
 2: [0, 5, 6]
@@ -143,5 +81,6 @@
 5: [2]
 6: [2]
 7: [4]</pre>
+    </div>
 </body>
 </html>

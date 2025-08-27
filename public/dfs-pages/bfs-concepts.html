@@ -4,83 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BFS Concepts</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 24px;
-            background-color: #ffffff;
-            color: #2d3748;
-            line-height: 1.6;
-        }
-
-        h1 {
-            color: #1a202c;
-            margin-bottom: 24px;
-            font-size: 28px;
-            font-weight: 700;
-            border-bottom: 2px solid #4299e1;
-            padding-bottom: 12px;
-        }
-
-        h2 {
-            color: #2d3748;
-            margin-top: 32px;
-            margin-bottom: 16px;
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        p {
-            margin-bottom: 16px;
-            color: #4a5568;
-            font-size: 15px;
-        }
-
-        ul, ol {
-            margin-left: 20px;
-            margin-bottom: 16px;
-        }
-
-        li {
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 15px;
-        }
-
-        strong {
-            color: #2b6cb0;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="shared-styles.css">
 </head>
 <body>
     <h1>Breadth-First Search (BFS)</h1>
     
-    <h2>Problem Description</h2>
-    <p>
-        Implement a Breadth-First Search algorithm to traverse a graph. BFS explores all neighbors at the current depth 
-        before moving to nodes at the next depth level, making it ideal for finding shortest paths in unweighted graphs.
-    </p>
+    <div class="section">
+        <h2>Problem Description</h2>
+        <p>
+            Implement a Breadth-First Search algorithm to traverse a graph. BFS explores all neighbors at the current depth 
+            before moving to nodes at the next depth level, making it ideal for finding shortest paths in unweighted graphs.
+        </p>
+    </div>
 
-    <h2>How BFS Works</h2>
-    <p>
-        Breadth-First Search works by exploring all nodes at the current level before moving to the next level. 
-        Think of it like ripples in a pond - you explore outward layer by layer from the starting point.
-    </p>
+    <div class="section">
+        <h2>How BFS Works</h2>
+        <p>
+            Breadth-First Search works by exploring all nodes at the current level before moving to the next level. 
+            Think of it like ripples in a pond - you explore outward layer by layer from the starting point.
+        </p>
+    </div>
 
-    <h2>Key Characteristics</h2>
-    <ul>
-        <li><strong>Uses a queue:</strong> Processes nodes in first-in-first-out order</li>
-        <li><strong>Level-order traversal:</strong> Visits all nodes at depth d before visiting nodes at depth d+1</li>
-        <li><strong>Shortest path:</strong> Guarantees shortest path in unweighted graphs</li>
-        <li><strong>Complete search:</strong> Will find a solution if one exists</li>
-    </ul>
+    <div class="section key-points">
+        <h2>Key Characteristics</h2>
+        <ul>
+            <li><strong>Uses a queue:</strong> Processes nodes in first-in-first-out order</li>
+            <li><strong>Level-order traversal:</strong> Visits all nodes at depth d before visiting nodes at depth d+1</li>
+            <li><strong>Shortest path:</strong> Guarantees shortest path in unweighted graphs</li>
+            <li><strong>Complete search:</strong> Will find a solution if one exists</li>
+        </ul>
+    </div>
 
-    <h2>Time & Space Complexity</h2>
-    <ul>
-        <li><strong>Time Complexity:</strong> O(V + E) where V = vertices, E = edges</li>
-        <li><strong>Space Complexity:</strong> O(V) for the queue and visited set</li>
-    </ul>
+    <div class="section complexity-table">
+        <h2>Time & Space Complexity</h2>
+        <ul>
+            <li><strong>Time Complexity:</strong> O(V + E) where V = vertices, E = edges</li>
+            <li><strong>Space Complexity:</strong> O(V) for the queue and visited set</li>
+        </ul>
+    </div>
 </body>
 </html>
