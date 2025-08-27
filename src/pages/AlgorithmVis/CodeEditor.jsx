@@ -16,22 +16,28 @@ export default function CodeEditor({
   isOutputCollapsed,
   setIsOutputCollapsed,
   pyodide,
-  isPyodideLoading
+  isPyodideLoading,
+  pyodideError
 }) {
   const editorRef = useRef(null);
   const [output, setOutput] = useState('');
   const [editorView, setEditorView] = useState(null);
 
-  setRunGraph(false)
+  useEffect(() => {
+    setRunGraph(false);
+  }, [setRunGraph]);
 
   // Update output when Pyodide is ready
   useEffect(() => {
+    console.log('Pyodide status:', { pyodide: !!pyodide, isPyodideLoading, pyodideError });
     if (pyodide && !isPyodideLoading) {
       setOutput('Python interpreter ready! You can now run your code.');
     } else if (isPyodideLoading) {
       setOutput('Loading Python interpreter... Please wait.');
+    } else if (pyodideError) {
+      setOutput(`Failed to load Python interpreter: ${pyodideError}\n\nPlease refresh the page to try again.`);
     }
-  }, [pyodide, isPyodideLoading]);
+  }, [pyodide, isPyodideLoading, pyodideError]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -39,13 +45,13 @@ export default function CodeEditor({
         doc: `# DFS Iterative Example (returns edge traversals)
 graph = {
     0: [1, 2],
-    1: [0, 3, 4],
-    2: [0, 5, 6],
-    3: [1],
-    4: [1, 7],
-    5: [2],
-    6: [2],
-    7: [4]
+    1: [3, 4],
+    2: [5, 6],
+    3: [],
+    4: [7],
+    5: [],
+    6: [],
+    7: []
 }
 
 def dfs_iterative_edges(graph, start):
@@ -57,15 +63,15 @@ def dfs_iterative_edges(graph, start):
         if current not in visited:
             visited.add(current)
             if parent is not None:
-                edge_path.append(f"\${parent}\${current}")
+                edge_path.append(f"{parent}{current}")
             # Add all unvisited neighbors to stack
             for neighbor in reversed(graph.get(current, [])):
                 if neighbor not in visited:
                     stack.append((neighbor, current))
     return edge_path
 
-# Run DFS from node 0
-print(dfs_iterative_edges(graph, 0))
+# Change the starting node below to see different DFS paths!
+dfs_iterative_edges(graph, 0)
 `,
         extensions: [
           lineNumbers(),
@@ -112,6 +118,9 @@ print(dfs_iterative_edges(graph, 0))
       return;
     }
 
+    // First, reset the graph state
+    setRunGraph(false);
+
     const code = editorView.state.doc.toString();
     setOutput('Running code...\n');
 
@@ -125,17 +134,50 @@ print(dfs_iterative_edges(graph, 0))
         capturedOutput += args.join(' ') + '\n';
       });
 
-      // Run the Python code
+      // Run the Python code (this defines the function and variables)
       await pyodide.runPythonAsync(code);
       
       let returnValues = {};
 
       try {
-        if (pyodide.globals.has('dfs_iterative_edges')) {
-          const result = pyodide.runPython('dfs_iterative_edges(graph, 1)');
+        // Parse the last line to get the function call dynamically
+        const lines = code.trim().split('\n');
+        const lastLine = lines[lines.length - 1].trim();
+        
+        // Check if the last line is a function call we can execute
+        if (lastLine && !lastLine.startsWith('#') && lastLine.includes('dfs_iterative_edges')) {
+          console.log("Executing:", lastLine);
+          
+          // Execute the last line to get the return value
+          const result = pyodide.runPython(lastLine);
           const jsResult = result.toJs ? result.toJs() : result;
           returnValues.dfs = jsResult;
-          capturedOutput += `\nReturn value from dfs_iterative_edges(): ${JSON.stringify(result)}\n`;
+          
+          // Also extract the starting node for the graph visualization
+          const startNodeMatch = lastLine.match(/dfs_iterative_edges\s*\(\s*graph\s*,\s*(\d+)\s*\)/);
+          if (startNodeMatch) {
+            returnValues.startNode = parseInt(startNodeMatch[1]);
+          }
+          
+          console.log("DFS result:", jsResult);
+          console.log("Start node:", returnValues.startNode);
+          
+          capturedOutput += `\nExecuting: ${lastLine}\n`;
+          capturedOutput += `DFS traversal result: ${JSON.stringify(jsResult)}\n`;
+          if (returnValues.startNode !== undefined) {
+            capturedOutput += `Starting from node: ${returnValues.startNode}\n`;
+          }
+        } else {
+          // Fallback to default call if no valid function call found
+          if (pyodide.globals.has('dfs_iterative_edges')) {
+            const result = pyodide.runPython('dfs_iterative_edges(graph, 0)');
+            const jsResult = result.toJs ? result.toJs() : result;
+            returnValues.dfs = jsResult;
+            returnValues.startNode = 0;
+            
+            capturedOutput += `\nNo function call found in last line, using default: dfs_iterative_edges(graph, 0)\n`;
+            capturedOutput += `DFS traversal result: ${JSON.stringify(jsResult)}\n`;
+          }
         }
       } catch (funcError) {
         capturedOutput += `\nFunction call error: ${funcError.message}\n`;
@@ -144,11 +186,17 @@ print(dfs_iterative_edges(graph, 0))
       // Restore original print function
       pyodide.globals.set('print', originalStdout);
 
+      // Send the results to the graph component
       setSharedData({
         output: returnValues,
+        resetAnimation: true, // Flag to reset the graph animation
+        timestamp: Date.now(), // Add timestamp to force updates
       });
 
-      setRunGraph(true)
+      // Use a small delay to ensure state updates properly, then trigger the graph to run
+      setTimeout(() => {
+        setRunGraph(Date.now()); // Use timestamp instead of boolean
+      }, 100);
       
       setOutput(capturedOutput || 'Code executed successfully! (No output)');
     } catch (error) {
@@ -198,14 +246,39 @@ print(dfs_iterative_edges(graph, 0))
             onClick={runCode}
             disabled={isPyodideLoading || !pyodide}
             className="run-button"
+            title={`Pyodide: ${!!pyodide}, Loading: ${isPyodideLoading}`}
           >
             {isPyodideLoading ? 'Loading...' : 'Run Code'}
           </button>
+          {pyodideError && (
+            <button 
+              onClick={() => window.location.reload()}
+              className="retry-button"
+              style={{ marginLeft: '8px', fontSize: '12px', padding: '4px 8px' }}
+            >
+              Retry (Refresh)
+            </button>
+          )}
           <button 
             onClick={() => setIsOutputCollapsed(!isOutputCollapsed)}
             className="toggle-output-button"
           >
             {isOutputCollapsed ? 'Show Output' : 'Hide Output'}
+          </button>
+          <button 
+            onClick={() => {
+              console.log('Debug info:', { 
+                pyodide: !!pyodide, 
+                isPyodideLoading,
+                pyodideType: typeof pyodide,
+                pyodideObject: pyodide 
+              });
+              setOutput(`Debug: Pyodide=${!!pyodide}, Loading=${isPyodideLoading}, Type=${typeof pyodide}`);
+            }}
+            className="debug-button"
+            style={{ fontSize: '12px', padding: '4px 8px' }}
+          >
+            Debug
           </button>
         </div>
       </div>

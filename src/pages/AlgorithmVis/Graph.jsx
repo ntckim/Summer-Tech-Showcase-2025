@@ -431,7 +431,9 @@ export default function CustomPathGraph({
 
   // --- Animation logic (unchanged) ---
   useEffect(() => {
+    console.log("Graph ordering changed:", graphOrdering);
     if (graphOrdering && graphOrdering.output) {
+      console.log("Setting new path from code:", graphOrdering.output.dfs);
       setPathNodeIds(graphOrdering.output.dfs);
       setIsUsingDefaultPath(false); // Set to false when a custom path is provided
     } else {
@@ -548,6 +550,7 @@ export default function CustomPathGraph({
 
   useEffect(() => {
     if (runGraph) {
+      console.log("Starting animation triggered by runGraph:", runGraph);
       startAnimation();
     }
   }, [runGraph]);

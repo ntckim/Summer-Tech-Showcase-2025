@@ -3,7 +3,6 @@ import CodeEditor from "./CodeEditor";
 import CustomPathGraph from "./Graph";
 import "./AlgorithmVis.css";
 import Layout from "../../layouts/Layout";
-import { loadPyodide } from "pyodide";
 import { getExamplesForAlgorithm } from "./graphExamples";
 
 export default function AlgorithmVis() {
@@ -17,8 +16,19 @@ export default function AlgorithmVis() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pyodide, setPyodide] = useState(null);
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
+  const [pyodideError, setPyodideError] = useState(null);
   const containerRef = useRef(null);
   const [selectedExample, setSelectedExample] = useState("simple");
+
+  // Debug useEffect to monitor state changes
+  useEffect(() => {
+    console.log("AlgorithmVis state:", { 
+      pyodide: !!pyodide, 
+      isPyodideLoading,
+      pyodideError,
+      pyodideType: typeof pyodide 
+    });
+  }, [pyodide, isPyodideLoading, pyodideError]);
 
   const concepts = [
     { id: "bigO", name: "Asymptotic Notation", file: "bigO-notation-concepts.html" },
@@ -57,15 +67,40 @@ export default function AlgorithmVis() {
     const initPyodide = async () => {
       try {
         console.log("Loading Python interpreter...");
-        const pyodideInstance = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/",
-        });
-        setPyodide(pyodideInstance);
-        setIsPyodideLoading(false);
-        console.log("Python interpreter loaded successfully!");
+        setIsPyodideLoading(true);
+        
+        // Load Pyodide from CDN
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js';
+        script.onload = async () => {
+          try {
+            const pyodideInstance = await window.loadPyodide({
+              indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/',
+            });
+            
+            console.log("Python interpreter loaded successfully!");
+            setPyodide(pyodideInstance);
+            setIsPyodideLoading(false);
+          } catch (error) {
+            console.error("Error initializing Pyodide:", error);
+            setPyodideError(error.message);
+            setIsPyodideLoading(false);
+            setPyodide(null);
+          }
+        };
+        script.onerror = (error) => {
+          console.error("Error loading Pyodide script:", error);
+          setPyodideError("Failed to load Pyodide from CDN");
+          setIsPyodideLoading(false);
+          setPyodide(null);
+        };
+        
+        document.head.appendChild(script);
       } catch (error) {
         console.error("Error loading Python interpreter:", error);
+        setPyodideError(error.message);
         setIsPyodideLoading(false);
+        setPyodide(null);
       }
     };
 
@@ -230,6 +265,7 @@ export default function AlgorithmVis() {
                     className="concepts-iframe"
                     title={getCurrentConcept().name}
                     key={selectedConcept}
+                    sandbox="allow-same-origin allow-scripts allow-forms"
                   />
                 </div>
               )}
@@ -244,6 +280,7 @@ export default function AlgorithmVis() {
                   setIsOutputCollapsed={setIsOutputCollapsed}
                   pyodide={pyodide}
                   isPyodideLoading={isPyodideLoading}
+                  pyodideError={pyodideError}
                 />
               )}
             </div>
