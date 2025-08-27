@@ -113,18 +113,23 @@ dfs_iterative_edges(graph, 0)
   }, []);
 
   const runCode = async () => {
-    if (!pyodide || !editorView) {
-      setOutput('Python interpreter not ready yet. Please wait...');
-      return;
-    }
-
-    // First, reset the graph state
-    setRunGraph(false);
-
-    const code = editorView.state.doc.toString();
-    setOutput('Running code...\n');
-
     try {
+      if (!pyodide || !editorView) {
+        setOutput('Python interpreter not ready yet. Please wait...');
+        return;
+      }
+
+      // First, reset the graph state
+      setRunGraph(false);
+
+      const code = editorView.state.doc.toString();
+      setOutput('Running code...\n');
+
+      // Validate that we have some code to run
+      if (!code.trim()) {
+        setOutput('No code to execute. Please enter some Python code.');
+        return;
+      }
       // Capture stdout
       let capturedOutput = '';
       const originalStdout = pyodide.globals.get('print');
@@ -145,38 +150,57 @@ dfs_iterative_edges(graph, 0)
         const lastLine = lines[lines.length - 1].trim();
         
         // Check if the last line is a function call we can execute
-        if (lastLine && !lastLine.startsWith('#') && lastLine.includes('dfs_iterative_edges')) {
+        // Look for any function that ends with "_edges" pattern
+        const functionCallPattern = /(\w+_edges)\s*\(\s*graph\s*,\s*(\d+)\s*\)/;
+        const functionMatch = lastLine.match(functionCallPattern);
+        
+        if (lastLine && !lastLine.startsWith('#') && functionMatch) {
+          const functionName = functionMatch[1];
+          const startNode = parseInt(functionMatch[2]);
+          
           console.log("Executing:", lastLine);
           
-          // Execute the last line to get the return value
-          const result = pyodide.runPython(lastLine);
-          const jsResult = result.toJs ? result.toJs() : result;
-          returnValues.dfs = jsResult;
-          
-          // Also extract the starting node for the graph visualization
-          const startNodeMatch = lastLine.match(/dfs_iterative_edges\s*\(\s*graph\s*,\s*(\d+)\s*\)/);
-          if (startNodeMatch) {
-            returnValues.startNode = parseInt(startNodeMatch[1]);
-          }
-          
-          console.log("DFS result:", jsResult);
-          console.log("Start node:", returnValues.startNode);
-          
-          capturedOutput += `\nExecuting: ${lastLine}\n`;
-          capturedOutput += `DFS traversal result: ${JSON.stringify(jsResult)}\n`;
-          if (returnValues.startNode !== undefined) {
-            capturedOutput += `Starting from node: ${returnValues.startNode}\n`;
-          }
-        } else {
-          // Fallback to default call if no valid function call found
-          if (pyodide.globals.has('dfs_iterative_edges')) {
-            const result = pyodide.runPython('dfs_iterative_edges(graph, 0)');
+          // Check if the function exists in the Python environment
+          if (pyodide.globals.has(functionName)) {
+            // Execute the last line to get the return value
+            const result = pyodide.runPython(lastLine);
             const jsResult = result.toJs ? result.toJs() : result;
             returnValues.dfs = jsResult;
-            returnValues.startNode = 0;
+            returnValues.startNode = startNode;
             
-            capturedOutput += `\nNo function call found in last line, using default: dfs_iterative_edges(graph, 0)\n`;
-            capturedOutput += `DFS traversal result: ${JSON.stringify(jsResult)}\n`;
+            console.log("Algorithm result:", jsResult);
+            console.log("Start node:", startNode);
+            
+            capturedOutput += `\nExecuting: ${lastLine}\n`;
+            capturedOutput += `Algorithm traversal result: ${JSON.stringify(jsResult)}\n`;
+            capturedOutput += `Starting from node: ${startNode}\n`;
+          } else {
+            capturedOutput += `\nError: Function '${functionName}' is not defined.\n`;
+          }
+        } else {
+          // Try to find any function that might be defined and callable
+          const allGlobals = pyodide.globals.toJs();
+          const availableFunctions = Object.keys(allGlobals).filter(key => 
+            typeof allGlobals[key] === 'function' && 
+            (key.includes('dfs') || key.includes('bfs') || key.includes('_edges'))
+          );
+          
+          if (availableFunctions.length > 0) {
+            // Use the first available algorithm function
+            const functionName = availableFunctions[0];
+            try {
+              const result = pyodide.runPython(`${functionName}(graph, 0)`);
+              const jsResult = result.toJs ? result.toJs() : result;
+              returnValues.dfs = jsResult;
+              returnValues.startNode = 0;
+              
+              capturedOutput += `\nNo function call found in last line, using available function: ${functionName}(graph, 0)\n`;
+              capturedOutput += `Algorithm traversal result: ${JSON.stringify(jsResult)}\n`;
+            } catch (callError) {
+              capturedOutput += `\nError calling ${functionName}: ${callError.message}\n`;
+            }
+          } else {
+            capturedOutput += `\nNo recognizable algorithm function found to execute.\n`;
           }
         }
       } catch (funcError) {
@@ -200,7 +224,12 @@ dfs_iterative_edges(graph, 0)
       
       setOutput(capturedOutput || 'Code executed successfully! (No output)');
     } catch (error) {
-      setOutput(`Error: ${error.message}`);
+      console.error('Code execution error:', error);
+      setOutput(`Error executing code: ${error.message}\n\nPlease check your Python syntax and try again.`);
+      
+      // Reset any graph state that might be in an inconsistent state
+      setSharedData(null);
+      setRunGraph(false);
     }
   };
 
