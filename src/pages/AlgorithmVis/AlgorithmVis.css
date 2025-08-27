@@ -43,7 +43,7 @@
 .left-side {
   min-width: 200px;
   border-right: 1px solid #ccc;
-  padding: 1rem;
+  padding: 0rem;
   background-color: #f8f9fa;
   overflow: auto;
   height: 100%;
@@ -87,13 +87,6 @@
   background-color: #fff;
 }
 
-/* Tab Styles */
-.tab-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
 .tab-buttons {
   display: flex;
   border-bottom: 2px solid #dee2e6;
@@ -102,7 +95,7 @@
 
 .tab-button {
   flex: 1;
-  padding: 12px 16px;
+  padding: 5px 5px;
   background-color: #f8f9fa;
   border: none;
   border-bottom: 3px solid transparent;
@@ -126,7 +119,10 @@
 
 .tab-content {
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Lesson Content Styles */
@@ -195,6 +191,9 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   border-radius: 8px;
   margin-bottom: 0;
+  min-height: 300px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .code-editor-container:hover {
@@ -261,7 +260,7 @@
   align-items: center;
   padding: 12px 0;
   border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .editor-header h3 {
@@ -277,7 +276,7 @@
 }
 
 .run-button, .toggle-output-button, .clear-output-button {
-  padding: 8px 16px;
+  padding: 2px 16px;
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -467,7 +466,7 @@
 /* Tab Styles - Updated for LeetCode style */
 .tab-container {
   height: 100%;
-  display: flex;
+  display: block;
   flex-direction: column;
 }
 
@@ -478,7 +477,7 @@
   background-color: #f7fafc;
 }
 
-.tab-button {
+/* .tab-button {
   flex: 1;
   padding: 16px 20px;
   background-color: transparent;
@@ -489,7 +488,7 @@
   font-weight: 500;
   color: #718096;
   transition: all 0.2s ease;
-}
+} */
 
 .tab-button:hover {
   background-color: #edf2f7;
@@ -556,13 +555,13 @@
 /* Concept menu styles */
 .concept-menu-container {
   position: relative;
-  margin-bottom: 12px;
+  margin-bottom: 5px;
   z-index: 1000;
 }
 
 .concept-menu-button {
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px 16px;
   background-color: #4299e1;
   color: white;
   border: none;
@@ -746,10 +745,10 @@
   }
 }
 
-.backtracking {
+/* .backtracking {
   animation: backtracking-pulse 0.6s ease-in-out;
   background-color: #ffc107 !important;
   border-color: #ffc107 !important;
   line-color: #ffc107 !important;
   target-arrow-color: #ffc107 !important;
-}
+} */

@@ -163,7 +163,20 @@ export default function AlgorithmVis() {
         style={{ cursor: isResizing ? "col-resize" : "default" }}
       >
         <div className="left-side" style={{ width: `${leftWidth}%` }}>
-          <div className="tab-container">
+          <div
+            className="tab-container"
+            style={{
+              display:
+                activeTab === "code"
+                  ? "block"
+                  : "flex",
+              flexDirection:
+                activeTab === "code"
+                  ? undefined
+                  : "column",
+              height: "100%"
+            }}
+          >
             <div className="tab-buttons">
               <button
                 className={`tab-button ${
@@ -171,13 +184,13 @@ export default function AlgorithmVis() {
                 }`}
                 onClick={() => setActiveTab("lesson")}
               >
-                Problem
+                Lesson
               </button>
               <button
                 className={`tab-button ${activeTab === "code" ? "active" : ""}`}
                 onClick={() => setActiveTab("code")}
               >
-                Solution
+                Example
               </button>
             </div>
 

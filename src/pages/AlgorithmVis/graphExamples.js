@@ -52,7 +52,7 @@ export const graphExamples = {
       ],
       startNode: 'A',
       // Show the actual path taken (edges) instead of complete traversal
-      defaultPath: ['AB', 'BD', 'BE', 'AC', 'CF', 'FG']
+      defaultPath: ['AB', 'BD', 'DE', 'AC', 'CF', 'FG']
     }
   },
 

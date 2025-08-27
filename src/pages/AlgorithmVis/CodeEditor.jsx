@@ -24,10 +24,6 @@ export default function CodeEditor({
 
   setRunGraph(false)
 
-  console.log(runGraph)
-
-  // Remove the Pyodide initialization useEffect since it's now handled by the parent
-
   // Update output when Pyodide is ready
   useEffect(() => {
     if (pyodide && !isPyodideLoading) {
@@ -40,11 +36,7 @@ export default function CodeEditor({
   useEffect(() => {
     if (editorRef.current) {
       const state = EditorState.create({
-        doc: `# Depth-First Search (DFS) Implementation
-# This code demonstrates both recursive and iterative DFS approaches
-
-# Sample graph representation using adjacency list
-# Each node maps to a list of its neighbors
+        doc: `# DFS Iterative Example (returns edge traversals)
 graph = {
     0: [1, 2],
     1: [0, 3, 4],
@@ -56,98 +48,24 @@ graph = {
     7: [4]
 }
 
-def dfs_recursive(graph, start, visited=None, path=None):
-    """
-    Recursive implementation of Depth-First Search
-    
-    Args:
-        graph: Dictionary representing the graph (adjacency list)
-        start: Starting node
-        visited: Set of visited nodes (for recursion)
-        path: List to store the traversal path (for recursion)
-    
-    Returns:
-        List representing the DFS traversal order
-    """
-    if visited is None:
-        visited = set()
-    if path is None:
-        path = []
-    
-    # Mark current node as visited and add to path
-    visited.add(start)
-    path.append(start)
-    
-    print(f"Visiting node {start}")
-    
-    # Explore all neighbors
-    for neighbor in graph.get(start, []):
-        if neighbor not in visited:
-            dfs_recursive(graph, neighbor, visited, path)
-    
-    return path
-
-def dfs_iterative(graph, start):
-    """
-    Iterative implementation of Depth-First Search using a stack
-    
-    Args:
-        graph: Dictionary representing the graph (adjacency list)
-        start: Starting node
-    
-    Returns:
-        List representing the DFS traversal order
-    """
+def dfs_iterative_edges(graph, start):
     visited = set()
-    path = []
-    stack = [start]
-    
+    edge_path = []
+    stack = [(start, None)]  # (current_node, parent_node)
     while stack:
-        # Pop the top node from stack
-        current = stack.pop()
-        
+        current, parent = stack.pop()
         if current not in visited:
-            # Mark as visited and add to path
             visited.add(current)
-            path.append(current)
-            
-            print(f"Visiting node {current}")
-            
+            if parent is not None:
+                edge_path.append(f"\${parent}\${current}")
             # Add all unvisited neighbors to stack
-            # We reverse the neighbors to maintain the same order as recursive version
             for neighbor in reversed(graph.get(current, [])):
                 if neighbor not in visited:
-                    stack.append(neighbor)
-    
-    return path
+                    stack.append((neighbor, current))
+    return edge_path
 
-def dfs():
-    """
-    Main function to demonstrate DFS on our sample graph
-    """
-    print("=== Depth-First Search Demo ===\\n")
-    
-    print("Sample Graph (Adjacency List):")
-    for node, neighbors in graph.items():
-        print(f"Node {node}: {neighbors}")
-    
-    print("\\n=== Recursive DFS ===")
-    recursive_path = dfs_recursive(graph, 0)
-    print(f"Recursive DFS path: {recursive_path}")
-    
-    print("\\n=== Iterative DFS ===")
-    iterative_path = dfs_iterative(graph, 0)
-    print(f"Iterative DFS path: {iterative_path}")
-    
-    print("\\n=== Comparison ===")
-    print(f"Both implementations should give the same result: {recursive_path == iterative_path}")
-    
-    # Return the path for visualization
-    return recursive_path
-
-# Run the demo
-if __name__ == "__main__":
-    dfs()
+# Run DFS from node 0
+print(dfs_iterative_edges(graph, 0))
 `,
         extensions: [
           lineNumbers(),
@@ -213,13 +131,11 @@ if __name__ == "__main__":
       let returnValues = {};
 
       try {
-        if (pyodide.globals.has('dfs')) {
-          const result = pyodide.runPython('dfs()');
-          //console.log(result);
+        if (pyodide.globals.has('dfs_iterative_edges')) {
+          const result = pyodide.runPython('dfs_iterative_edges(graph, 1)');
           const jsResult = result.toJs ? result.toJs() : result;
-          //console.log("Converted Result:", jsResult);
           returnValues.dfs = jsResult;
-          capturedOutput += `\nReturn value from dfs(): ${JSON.stringify(result)}\n`;
+          capturedOutput += `\nReturn value from dfs_iterative_edges(): ${JSON.stringify(result)}\n`;
         }
       } catch (funcError) {
         capturedOutput += `\nFunction call error: ${funcError.message}\n`;
@@ -244,26 +160,9 @@ if __name__ == "__main__":
     setOutput('');
   };
 
+  // Make the editor and output scrollable together
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="editor-header">
-        <h3>Python Code Editor</h3>
-        <div className="editor-controls">
-          <button 
-            onClick={runCode}
-            disabled={isPyodideLoading || !pyodide}
-            className="run-button"
-          >
-            {isPyodideLoading ? 'Loading...' : 'Run Code'}
-          </button>
-          <button 
-            onClick={() => setIsOutputCollapsed(!isOutputCollapsed)}
-            className="toggle-output-button"
-          >
-            {isOutputCollapsed ? 'Show Output' : 'Hide Output'}
-          </button>
-        </div>
-      </div>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: 0 }}>
 
       {isPyodideLoading && (
         <div className="loading-notice">
@@ -274,10 +173,7 @@ if __name__ == "__main__":
       <div 
         ref={editorRef} 
         className="code-editor-container"
-        style={{ 
-          flex: isOutputCollapsed ? '1' : '1',
-          minHeight: isOutputCollapsed ? '400px' : '300px',
-        }}
+        style={{ minHeight: '300px' }}
       />
       
       {!isOutputCollapsed && (
@@ -296,6 +192,23 @@ if __name__ == "__main__":
           </div>
         </div>
       )}
+      <div className="editor-header">
+        <div className="editor-controls">
+          <button 
+            onClick={runCode}
+            disabled={isPyodideLoading || !pyodide}
+            className="run-button"
+          >
+            {isPyodideLoading ? 'Loading...' : 'Run Code'}
+          </button>
+          <button 
+            onClick={() => setIsOutputCollapsed(!isOutputCollapsed)}
+            className="toggle-output-button"
+          >
+            {isOutputCollapsed ? 'Show Output' : 'Hide Output'}
+          </button>
+        </div>
+      </div>
     </div>
   );
-} 
+}
