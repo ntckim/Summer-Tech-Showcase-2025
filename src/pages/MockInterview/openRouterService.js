@@ -123,12 +123,12 @@ function process_resume(text) {
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     let firstLineRedacted = false;
     let processedText = '';
-    const sectionHeaderRegex = /^([A-Z ]{2,})\s*[_-]*$/;
 
-    const emailRegex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
-    const phoneRegex = /\(?\d{3}\)?[\s.-]*\d{3}[\s.-]*\d{4}/g;
-    const linkedinRegex = /https?:\/\/(www\.)?linkedin\.com\/[A-Za-z0-9_-]+\/?/gi;
-    const githubRegex = /https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_-]+\/?/gi;
+    const sectionHeaderRegex = /^([A-Z ]{2,})\s*[_-]*$/;
+    const emailRegex = /\b(?:[A-Z0-9._%+-]\s*)+@(?:[A-Z0-9.-]\s*)+\.[A-Z]{2,}\b/gi;
+    const phoneRegex = /\(?\s*\d\s*\d\s*\d\s*\)?[\s.-]*\d\s*\d\s*\d[\s.-]*\d\s*\d\s*\d\s*\d/g;
+    const linkedinRegex = /https?:\/\/(?:www\.)?linkedin\.com\/(?:[A-Z0-9_-]\s*)+\/?/gi;
+    const githubRegex = /https?:\/\/(?:www\.)?github\.com\/(?:[A-Z0-9_-]\s*)+\/?/gi;
 
     for (let line of lines) {
         if (!firstLineRedacted) {

@@ -41,11 +41,16 @@ export default function InterviewSession({
     const question = getCurrentQuestion();
     if (!question) return;
 
-    console.log("[Chat UI] Display question index: ", currentQuestionIndexRef.current);
+    console.log(
+      "[Chat UI] Display question index: ",
+      currentQuestionIndexRef.current
+    );
 
     const questionMessage = {
       type: "interviewer",
-      content: `Question ${currentQuestionIndexRef.current + 1}: ${question.question}`,
+      content: `Question ${currentQuestionIndexRef.current + 1}: ${
+        question.question
+      }`,
       timestamp: new Date().toLocaleTimeString(),
       company: question.company,
     };
@@ -60,7 +65,9 @@ export default function InterviewSession({
     setIsInterviewStarted(true);
     const greeting = {
       type: "interviewer",
-      content: `Hello! Welcome to your mock interview. We'll go through ${questions.length} questions, focusing on ${improvementAreas.join(", ")}. Let's begin.`,
+      content: `Hello! Welcome to your mock interview. We'll go through ${
+        questions.length
+      } questions, focusing on ${improvementAreas.join(", ")}. Let's begin.`,
       timestamp: new Date().toLocaleTimeString(),
     };
     setConversation([greeting]);
@@ -72,7 +79,12 @@ export default function InterviewSession({
 
   const generateFeedbackFromLLM = async (answer, question, areas) => {
     try {
-      return await generateFeedback(answer, question.question, question.company, areas);
+      return await generateFeedback(
+        answer,
+        question.question,
+        question.company,
+        areas
+      );
     } catch (error) {
       console.error("Error generating feedback:", error);
       return "Thanks for the answer. Make the structure clearer, include one specific example, and state your result directly. Keep practicing.";
@@ -83,7 +95,10 @@ export default function InterviewSession({
     async (answerText) => {
       if (!answerText.trim()) return;
 
-      console.log("[Transcript / Speech] Answering question index: ", currentQuestionIndexRef.current);
+      console.log(
+        "[Transcript / Speech] Answering question index: ",
+        currentQuestionIndexRef.current
+      );
 
       const question = getCurrentQuestion();
 
@@ -98,7 +113,11 @@ export default function InterviewSession({
       setIsProcessingAnswer(true);
 
       try {
-        const feedbackResponse = await generateFeedbackFromLLM(answerText, question, improvementAreas);
+        const feedbackResponse = await generateFeedbackFromLLM(
+          answerText,
+          question,
+          improvementAreas
+        );
         const feedbackMessage = {
           type: "interviewer",
           content: feedbackResponse,
@@ -111,7 +130,8 @@ export default function InterviewSession({
           ...prev,
           {
             type: "interviewer",
-            content: "I hit an error while analyzing your answer. Let's continue.",
+            content:
+              "I hit an error while analyzing your answer. Let's continue.",
             timestamp: new Date().toLocaleTimeString(),
           },
         ]);
@@ -125,7 +145,10 @@ export default function InterviewSession({
   const nextQuestion = useCallback(() => {
     if (isProcessingAnswer) return;
 
-    console.log("[Next Question] Current index before increment: ", currentQuestionIndexRef.current);
+    console.log(
+      "[Next Question] Current index before increment: ",
+      currentQuestionIndexRef.current
+    );
 
     if (currentQuestionIndexRef.current < questions.length - 1) {
       const newIndex = currentQuestionIndexRef.current + 1;
@@ -151,7 +174,8 @@ export default function InterviewSession({
         ...prev,
         {
           type: "interviewer",
-          content: "That’s all the questions. Nice work! Review the transcript and refine your answers.",
+          content:
+            "That’s all the questions. Nice work! Review the transcript and refine your answers.",
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
@@ -166,13 +190,44 @@ export default function InterviewSession({
   const currentQuestion = getCurrentQuestion();
 
   return (
-    <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column", background: "#f8fafc" }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "#f8fafc",
+      }}
+    >
       {/* Header */}
-      <div style={{ padding: "14px 22px", borderBottom: "1px solid #e2e8f0", background: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          padding: "14px 22px",
+          borderBottom: "1px solid #e2e8f0",
+          background: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#1e293b" }}>Mock Interview Session</h1>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 20,
+              fontWeight: 700,
+              color: "#1e293b",
+            }}
+          >
+            Mock Interview Session
+          </h1>
           <p style={{ margin: "20px 0 0", color: "#64748b", fontSize: 12 }}>
-            {isInterviewStarted ? `Question ${Math.min(currentQuestionIndex + 1, questions.length)} of ${questions.length}` : "Ready"}
+            {isInterviewStarted
+              ? `Question ${Math.min(
+                  currentQuestionIndex + 1,
+                  questions.length
+                )} of ${questions.length}`
+              : "Ready"}
           </p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -207,9 +262,18 @@ export default function InterviewSession({
 
       {/* Stream (chat bubbles) */}
       <div style={{ flex: 1, display: "flex", position: "relative" }}>
-        <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px", background: "#fff" }}>
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "24px 28px",
+            background: "#fff",
+          }}
+        >
           {!isInterviewStarted ? (
-            <div style={{ display: "grid", placeItems: "center", height: "100%" }}>
+            <div
+              style={{ display: "grid", placeItems: "center", height: "100%" }}
+            >
               <button
                 onClick={startInterview}
                 style={{
@@ -234,10 +298,19 @@ export default function InterviewSession({
                     {m.company ? ` · ${m.company}` : ""}
                   </div>
                   <div style={{ fontSize: 16 }}>
-                    <span style={{ fontWeight: 700, color: m.type === "interviewer" ? "#1e40af" : "#065f46" }}>
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        color: m.type === "interviewer" ? "#1e40af" : "#065f46",
+                      }}
+                    >
                       {m.type === "interviewer" ? "Interviewer: " : "You: "}
                     </span>
-                    <TypewriterText text={m.content} speed={m.type === "interviewer" ? 16 : 18} showCursor={i === conversation.length - 1} />
+                    <TypewriterText
+                      text={m.content}
+                      speed={m.type === "interviewer" ? 16 : 18}
+                      showCursor={i === conversation.length - 1}
+                    />
                   </div>
                 </div>
               ))}
@@ -248,31 +321,85 @@ export default function InterviewSession({
 
         {/* PiP Camera */}
         {showCamera && (
-          <div style={{ position: "absolute", right: 16, bottom: 96, width: 280, boxShadow: "0 10px 20px rgba(0,0,0,.15)", borderRadius: 12, overflow: "hidden", background: "#fff", border: "1px solid #e5e7eb" }}>
+          <div
+            style={{
+              position: "absolute",
+              right: 16,
+              bottom: 96,
+              width: 280,
+              boxShadow: "0 10px 20px rgba(0,0,0,.15)",
+              borderRadius: 12,
+              overflow: "hidden",
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+            }}
+          >
             <CameraFeed />
           </div>
         )}
       </div>
 
       {/* Sticky controls */}
-      <div style={{ position: "sticky", bottom: 0, background: "rgba(248,250,252,0.9)", backdropFilter: "saturate(180%) blur(8px)", borderTop: "1px solid #e2e8f0", padding: "12px 16px", display: "flex", alignItems: "flex-start", gap: 16 }}>
+      <div
+        style={{
+          position: "sticky",
+          bottom: 0,
+          background: "rgba(248,250,252,0.9)",
+          backdropFilter: "saturate(180%) blur(8px)",
+          borderTop: "1px solid #e2e8f0",
+          padding: "12px 16px",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 16,
+          marginBottom: "20px",
+        }}
+      >
         <div style={{ flex: 1, minWidth: 200 }}>
           {isQuestionDisplayed && currentQuestion ? (
             <>
-              <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>Current question</div>
+              <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>
+                Current question
+              </div>
               <div style={{ fontSize: 16, fontWeight: 600, color: "#111827" }}>
                 <TypewriterText text={currentQuestion.question} speed={14} />
               </div>
-              {currentQuestion.company && <div style={{ marginTop: 6, fontSize: 12, color: "#374151" }}>{currentQuestion.company}</div>}
+              {currentQuestion.company && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#374151" }}>
+                  {currentQuestion.company}
+                </div>
+              )}
             </>
           ) : (
-            <div style={{ fontSize: 14, color: "#6b7280", display: "flex", alignItems: "center", gap: 10 }} aria-busy={isProcessingAnswer}>
+            <div
+              style={{
+                fontSize: 14,
+                color: "#6b7280",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+              aria-busy={isProcessingAnswer}
+            >
               {isProcessingAnswer ? (
                 <>
-                  <span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid #d1d5db", borderTopColor: "#2563eb", display: "inline-block", animation: "spin 1s linear infinite" }} />
+                  <span
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: "50%",
+                      border: "2px solid #d1d5db",
+                      borderTopColor: "#2563eb",
+                      display: "inline-block",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
                   Generating feedback…
                 </>
-              ) : isInterviewStarted ? "Ready" : "Click Start Interview"}
+              ) : isInterviewStarted ? (
+                "Ready"
+              ) : (
+                "Click Start Interview"
+              )}
             </div>
           )}
         </div>
@@ -300,10 +427,17 @@ export default function InterviewSession({
               background: "#fff",
               color: "#111827",
               fontWeight: 600,
-              cursor: currentQuestionIndex === 0 || isProcessingAnswer ? "not-allowed" : "pointer",
+              cursor:
+                currentQuestionIndex === 0 || isProcessingAnswer
+                  ? "not-allowed"
+                  : "pointer",
               opacity: isProcessingAnswer ? 0.6 : 1,
             }}
-            title={isProcessingAnswer ? "Wait for feedback to finish" : "Previous question"}
+            title={
+              isProcessingAnswer
+                ? "Wait for feedback to finish"
+                : "Previous question"
+            }
           >
             ← Previous
           </button>
@@ -326,9 +460,21 @@ export default function InterviewSession({
             title={isProcessingAnswer ? "Generating feedback…" : ""}
           >
             {isProcessingAnswer && (
-              <span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid rgba(255,255,255,.6)", borderTopColor: "#fff", display: "inline-block", animation: "spin 1s linear infinite" }} />
+              <span
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "2px solid rgba(255,255,255,.6)",
+                  borderTopColor: "#fff",
+                  display: "inline-block",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
             )}
-            {currentQuestionIndex < questions.length - 1 ? "Next →" : "Complete"}
+            {currentQuestionIndex < questions.length - 1
+              ? "Next →"
+              : "Complete"}
           </button>
 
           <button

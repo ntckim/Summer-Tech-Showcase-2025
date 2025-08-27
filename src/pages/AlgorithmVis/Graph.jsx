@@ -54,6 +54,9 @@ export default function CustomPathGraph({
         'text-outline-width': 2,
         'text-outline-color': '#999',
         'font-size': 16,
+        width: 40,
+        height: 40,
+        'shape': 'ellipse',
       },
     },
     {
@@ -239,7 +242,8 @@ export default function CustomPathGraph({
   const applyLayout = (layoutName) => {
     const cy = cyRef.current;
     if (!cy) return;
-    
+
+    // Override layout options for tighter node spacing and shorter edges
     const layoutOptions = {
       cose: {
         name: 'cose',
@@ -249,10 +253,10 @@ export default function CustomPathGraph({
         fit: true,
         padding: 50,
         randomize: false,
-        componentSpacing: 100,
-        nodeRepulsion: 400000,
-        nodeOverlap: 20,
-        idealEdgeLength: 100,
+        componentSpacing: 30, // much closer
+        nodeRepulsion: 10000, // much less repulsion
+        nodeOverlap: 10,
+        idealEdgeLength: 40, // shorter edges
         edgeElasticity: 100,
         nestingFactor: 5,
         gravity: 80,
@@ -268,7 +272,7 @@ export default function CustomPathGraph({
         directed: true,
         roots: currentExample?.startNode ? `#${currentExample.startNode}` : undefined,
         padding: 50,
-        spacingFactor: 1.5,
+        spacingFactor: 0.7, // much closer
         nodeDimensionsIncludeLabels: true,
         fit: true
       },
@@ -277,7 +281,7 @@ export default function CustomPathGraph({
         animate: true,
         animationDuration: 1000,
         padding: 50,
-        radius: undefined,
+        radius: 80, // smaller radius
         startAngle: 3/2 * Math.PI,
         sweep: undefined,
         clockwise: true,
@@ -290,7 +294,10 @@ export default function CustomPathGraph({
         animationDuration: 1000,
         padding: 50,
         fit: true,
-        nodeDimensionsIncludeLabels: true
+        nodeDimensionsIncludeLabels: true,
+        rows: undefined,
+        cols: undefined,
+        spacingFactor: 0.7 // much closer
       },
       random: {
         name: 'random',
@@ -300,18 +307,18 @@ export default function CustomPathGraph({
         padding: 50
       }
     };
-    
+
     const layout = layoutOptions[layoutName];
     if (layout) {
       const layoutInstance = cy.layout(layout);
-      
+
       // Listen for layout completion
       layoutInstance.on('layoutstop', () => {
         console.log('Layout completed, fitting to view...');
         // Single fitting call after layout completes
         fitToView();
       });
-      
+
       layoutInstance.run();
     }
   };
@@ -320,82 +327,55 @@ export default function CustomPathGraph({
   const fitToView = () => {
     const cy = cyRef.current;
     if (!cy) return;
-    
+
     try {
-      // Get the bounding box of all elements
       const elements = cy.elements();
       if (elements.length === 0) return;
-      
-      console.log('Fitting graph to view...');
-      console.log('Elements count:', elements.length);
-      
-      // Get the actual container dimensions from the DOM element
+
+      // Get container dimensions
       let containerWidth, containerHeight;
       const containerElement = cy.container();
-      
       if (containerElement) {
         const containerRect = containerElement.getBoundingClientRect();
         containerWidth = containerRect.width;
         containerHeight = containerRect.height;
-        console.log('Using Cytoscape container size:', containerWidth, 'x', containerHeight);
       } else {
-        console.log('Container not ready, using fallback dimensions');
-        // Fallback: use the parent div dimensions
-        const parentDiv = document.querySelector('.right-side');
-        if (parentDiv) {
-          const parentRect = parentDiv.getBoundingClientRect();
-          containerWidth = parentRect.width;
-          containerHeight = parentRect.height;
-          console.log('Using parent container size:', containerWidth, 'x', containerHeight);
-        } else {
-          // Final fallback: use window dimensions
-          containerWidth = window.innerWidth * 0.6; // Approximate right side width
-          containerHeight = window.innerHeight * 0.8; // Approximate height
-          console.log('Using fallback dimensions:', containerWidth, 'x', containerHeight);
-        }
+        containerWidth = window.innerWidth * 0.6;
+        containerHeight = window.innerHeight * 0.8;
       }
-      
-      console.log('Final container size:', containerWidth, 'x', containerHeight);
-      
-      // First, ensure all elements are visible by resetting extreme positions
-      cy.elements().forEach(element => {
-        if (element.isNode()) {
-          const pos = element.position();
-          // If node is way outside viewport, bring it back
-          if (pos.x < -1000 || pos.x > 1000 || pos.y < -1000 || pos.y > 1000) {
-            element.position({ x: 0, y: 0 });
-          }
-        }
-      });
-      
-      // Get the bounding box of all elements
-      const elementsBoundingBox = elements.boundingBox();
-      const graphWidth = elementsBoundingBox.w;
-      const graphHeight = elementsBoundingBox.h;
-      
-      console.log('Graph bounding box:', elementsBoundingBox);
-      
-      // Calculate optimal zoom level based on actual container size
-      // Use 100px padding on each side for better visibility
+
+      // Get bounding box of all elements
+      const bbox = elements.boundingBox();
+      const graphWidth = bbox.w;
+      const graphHeight = bbox.h;
+
+      // Calculate zoom to fit all elements with padding
       const padding = 100;
-      const zoomX = (containerWidth - (padding * 2)) / graphWidth;
-      const zoomY = (containerHeight - (padding * 2)) / graphHeight;
-      const optimalZoom = Math.min(zoomX, zoomY, 1.5); // Cap at 1.5x zoom
-      
-      console.log('Calculated optimal zoom:', optimalZoom);
-      
-      // Apply the optimal zoom and center
+      const zoomX = (containerWidth - padding * 2) / graphWidth;
+      const zoomY = (containerHeight - padding * 2) / graphHeight;
+      const optimalZoom = Math.min(zoomX, zoomY, 1.5);
+
+      // Center coordinates for graph and container
+      const graphCenter = {
+        x: bbox.x1 + graphWidth / 2,
+        y: bbox.y1 + graphHeight / 2
+      };
+      const containerCenter = {
+        x: containerWidth / 2,
+        y: containerHeight / 2
+      };
+
+      // Set zoom and pan so graph center aligns with container center
       if (optimalZoom > 0.1 && optimalZoom < 3) {
-        cy.zoom({ level: optimalZoom, renderedPosition: { x: containerWidth / 2, y: containerHeight / 2 } });
+        cy.zoom(optimalZoom);
+        cy.pan({
+          x: containerCenter.x - graphCenter.x * optimalZoom,
+          y: containerCenter.y - graphCenter.y * optimalZoom
+        });
+      } else {
+        cy.fit(elements, padding);
       }
-      
-      // Center the view on the elements
-      cy.center(elements);
-      
-      console.log('Graph fitted to view with zoom:', optimalZoom);
     } catch (error) {
-      console.error('Error fitting graph to view:', error);
-      // Fallback: simple fit
       cy.fit(cy.elements(), 50);
     }
   };
@@ -835,12 +815,20 @@ export default function CustomPathGraph({
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+    <div style={{ position: 'relative', width: '150%', height: '100%', transform: 'scale(0.67)', transformOrigin: 'top left' }}>
       <CytoscapeComponent
         cy={(cy) => (cyRef.current = cy)}
         elements={elements}
-        style={{ width: '100%', height: '100%' }}
-        layout={{ name: 'cose', animate: false, fit: true, padding: 50 }}
+        style={{ width: '150%', height: '150%' }} // expand canvas to compensate for scale
+        layout={{
+          name: 'cose',
+          animate: false,
+          fit: true,
+          padding: 50,
+          componentSpacing: 100, // more space for initial render
+          nodeRepulsion: 400000,
+          idealEdgeLength: 120, // longer edges for initial render
+        }}
         stylesheet={style}
         userPanningEnabled={true}
         userZoomingEnabled={true}
@@ -864,14 +852,17 @@ export default function CustomPathGraph({
           display: 'flex',
           flexDirection: 'column',
           gap: '6px',
-          minWidth: '120px',
+          minWidth: '90px', // reduced min width
+          maxWidth: '140px', // set max width
+          maxHeight: '70vh', // limit height for scroll
+          overflowY: 'auto', // enable vertical scroll
         }}>
-          <button onClick={handleAddNode}>Add Node</button>
-          <button onClick={handleRemoveNode} disabled={!selected || selected.type !== 'node'}>Remove Node</button>
+          {/* <button onClick={handleAddNode}>Add Node</button> */}
+          {/* <button onClick={handleRemoveNode} disabled={!selected || selected.type !== 'node'}>Remove Node</button>
           <button onClick={handleStartEdge} disabled={!selected || selected.type !== 'node'}>
             {edgeCreation.length === 1 ? 'Select Target' : 'Add Edge'}
           </button>
-          <button onClick={handleRemoveEdge} disabled={!selected || selected.type !== 'edge'}>Remove Edge</button>
+          <button onClick={handleRemoveEdge} disabled={!selected || selected.type !== 'edge'}>Remove Edge</button> */}
           <hr />
           <div className="layout-section">
             <div className="layout-section-title">Layouts:</div>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asymptotic Notation</title>
+    <link rel="stylesheet" href="shared-styles.css">
+</head>
+<body>
+    <h1>Asymptotic Notation</h1>
+    <div class="section">
+    <h2>Big O and Big Theta</h2>
+        <p>
+            Big O notation (O) describes the upper bound of an algorithm's growth rate, while Big Theta (Θ) 
+            provides a tight bound indicating both upper and lower limits. Big Omega (Ω) provides the lower bound. 
+            Together, these notations help analyze algorithm efficiency as input size grows.
+        </p>
+    </div>
+    <div class="section">
+        <h2>How Asymptotic Notation Works</h2>
+        <p>
+            Asymptotic notation describes how algorithms behave as input size approaches infinity. 
+            It focuses on the dominant term and ignores constants and lower-order terms, providing 
+            a mathematical framework for comparing algorithm efficiency.
+        </p>
+    </div>
+
+    <div class="section key-points">
+        <h2>Types of Asymptotic Notation</h2>
+        <ul>
+            <li><strong>Big O (O):</strong> Upper bound - worst-case time complexity</li>
+            <li><strong>Big Omega (Ω):</strong> Lower bound - best-case time complexity</li>
+            <li><strong>Big Theta (Θ):</strong> Tight bound - both upper and lower bounds</li>
+            <li><strong>Little o (o):</strong> Strict upper bound (less commonly used)</li>
+            <li><strong>Little omega (ω):</strong> Strict lower bound (less commonly used)</li>
+        </ul>
+    </div>
+
+    <div class="section algorithm-steps">
+        <h3>Common Growth Rates:</h3>
+        <ol>
+            <li><strong>Θ(1):</strong> Constant time - same runtime regardless of input size</li>
+            <li><strong>Θ(log n):</strong> Logarithmic time - runtime grows logarithmically</li>
+            <li><strong>Θ(n):</strong> Linear time - runtime grows proportionally with input</li>
+            <li><strong>Θ(n log n):</strong> Linearithmic time - common in efficient sorting</li>
+            <li><strong>Θ(n²):</strong> Quadratic time - runtime grows with square of input</li>
+            <li><strong>Θ(2ⁿ):</strong> Exponential time - runtime doubles with each input</li>
+        </ol>
+    </div>
+
+    <div class="section applications">
+        <h2>Why Asymptotic Analysis Matters</h2>
+        <ul>
+            <li>Algorithm comparison across different implementations</li>
+            <li>Performance prediction for large-scale systems</li>
+            <li>Resource planning and scalability analysis</li>
+            <li>Academic research and algorithm design</li>
+            <li>Technical interviews and competitive programming</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Mathematical Definitions</h2>
+        <p>
+            For functions f(n) and g(n):
+        </p>
+        <ul>
+            <li><strong>f(n) = O(g(n)):</strong> ∃ constants c, n₀ such that f(n) ≤ c·g(n) for all n ≥ n₀</li>
+            <li><strong>f(n) = Ω(g(n)):</strong> ∃ constants c, n₀ such that f(n) ≥ c·g(n) for all n ≥ n₀</li>
+            <li><strong>f(n) = Θ(g(n)):</strong> f(n) = O(g(n)) and f(n) = Ω(g(n))</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Example Analysis</h2>
+        <p>
+            Consider a nested loop algorithm:
+        </p>
+        <pre>for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+        // O(1) operation
+    }
+}</pre>
+        <p>
+            <strong>Analysis:</strong><br>
+            • Best case: Ω(n²) - must execute all iterations<br>
+            • Worst case: O(n²) - cannot exceed n² operations<br>
+            • Tight bound: Θ(n²) - always exactly n² iterations
+        </p>
+    </div>
+</body>
+</html>
