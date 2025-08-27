@@ -24,7 +24,10 @@ export default function MockInterview() {
       // Generate questions using GPT
       const generatedQuestions = await generateInterviewQuestions(formData);
 
-      if (!Array.isArray(generatedQuestions) || generatedQuestions.length === 0) {
+      if (
+        !Array.isArray(generatedQuestions) ||
+        generatedQuestions.length === 0
+      ) {
         throw new Error("No questions generated. Please try again.");
       }
 
@@ -66,10 +69,10 @@ export default function MockInterview() {
             margin: "2.5rem auto",
             borderRadius: "16px",
             border: "1px solid var(--border)",
-            backgroundColor: "var(--muted-bg)",   // theme-aware
+            backgroundColor: "var(--muted-bg)", // theme-aware
             padding: "2rem",
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-            color: "var(--text)",                 // ensure readable text
+            color: "var(--text)", // ensure readable text
           }}
         >
           <h1
@@ -97,7 +100,7 @@ export default function MockInterview() {
                       width: "40px",
                       height: "40px",
                       border: "4px solid var(--border)", // base ring
-                      borderTop: "4px solid #2563eb",    // brand ring
+                      borderTop: "4px solid #2563eb", // brand ring
                       borderRadius: "50%",
                       animation: "spin 1s linear infinite",
                     }}
@@ -105,7 +108,13 @@ export default function MockInterview() {
                   <p style={{ marginTop: "12px", color: "var(--text)" }}>
                     Generating personalized interview questions with AI…
                   </p>
-                  <p style={{ marginTop: "8px", color: "var(--muted-text)", fontSize: "14px" }}>
+                  <p
+                    style={{
+                      marginTop: "8px",
+                      color: "var(--muted-text)",
+                      fontSize: "14px",
+                    }}
+                  >
                     This may take a few moments
                   </p>
                 </div>
@@ -124,8 +133,15 @@ export default function MockInterview() {
                   <p style={{ color: "#dc2626", margin: "0 0 8px 0" }}>
                     Error: {err}
                   </p>
-                  <p style={{ color: "var(--muted-text)", fontSize: "14px", margin: 0 }}>
-                    Please check your OpenAI API key configuration and try again.
+                  <p
+                    style={{
+                      color: "var(--muted-text)",
+                      fontSize: "14px",
+                      margin: 0,
+                    }}
+                  >
+                    Please check your OpenAI API key configuration and try
+                    again.
                   </p>
                 </div>
               )}
@@ -152,7 +168,7 @@ export default function MockInterview() {
                   textAlign: "center",
                 }}
               >
-                Questions Generated Successfully!
+                Thanks for taking the interview!
               </h3>
 
               <p
@@ -163,8 +179,8 @@ export default function MockInterview() {
                   textAlign: "center",
                 }}
               >
-                We've prepared {questions.length} personalized interview questions for you.
-                Click the button below to start your mock interview session.
+                You can download a copy of your interview transcript through the
+                button below as well!
               </p>
 
               <div style={{ textAlign: "center" }}>
